@@ -37,8 +37,10 @@ public class User {
 
     public User(UserRegisterDTO data){
         this.name = data.name();
+        this.password = data.password();
         this.email = data.email();
         this.phone = data.phone();
+        this.userType = data.userType();
         this.address = new Address(data.address());
     }
 

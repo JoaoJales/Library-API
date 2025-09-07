@@ -15,7 +15,10 @@ public record UserRegisterDTO(
         String email,
 
         @NotBlank
-        //@Pattern(regexp = "")
+        @Pattern(
+                regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
+                message = "Password must have at least 8 characters, including one letter and one number."
+        )
         String password,
 
         @NotBlank

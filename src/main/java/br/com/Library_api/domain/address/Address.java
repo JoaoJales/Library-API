@@ -1,6 +1,7 @@
 package br.com.Library_api.domain.address;
 
 import br.com.Library_api.dto.address.AddressDTO;
+import br.com.Library_api.dto.address.PutAddressDTO;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class Address {
         this.complement = data.complement();
     }
 
-    public void updateInfoAddress(AddressDTO data){
+    public void updateInfoAddress(PutAddressDTO data){
         if (data.street() != null) this.street = data.street();
         if (data.district() != null) this.district = data.district();
         if (data.postalCode() != null) this.postalCode = data.postalCode();
@@ -38,6 +39,5 @@ public class Address {
         if (data.state() != null) this.state = data.state();
         if (data.houseNumber() != null) this.houseNumber = data.houseNumber();
         if (data.complement() != null) this.complement = data.complement();
-
     }
 }

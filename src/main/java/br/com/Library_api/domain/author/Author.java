@@ -3,6 +3,7 @@ package br.com.Library_api.domain.author;
 import br.com.Library_api.domain.book.Book;
 import br.com.Library_api.dto.author.AuthorRegisterDTO;
 import br.com.Library_api.dto.author.PutAuthorDTO;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -28,6 +29,7 @@ public class Author {
     private LocalDate birthDate;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.PERSIST)
+    @JsonManagedReference
     private List<Book> books = new ArrayList<>();
 
     public Author (AuthorRegisterDTO data){

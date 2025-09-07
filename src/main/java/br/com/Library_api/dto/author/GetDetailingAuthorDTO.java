@@ -6,8 +6,8 @@ import br.com.Library_api.domain.book.Book;
 import java.time.LocalDate;
 import java.util.List;
 
-public record GetAuthorsDTO(Long id, String name, String nationality, LocalDate birthDate, List<Book> books) {
-    public GetAuthorsDTO(Author author){
+public record GetDetailingAuthorDTO(Long id, String name, String nationality, LocalDate birthDate, List<Book> books) {
+    public GetDetailingAuthorDTO(Author author){
         this(author.getId(), author.getName(), author.getNationality(), author.getBirthDate(), author.getBooks());
 
     }
