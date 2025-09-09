@@ -2,6 +2,8 @@ package br.com.Library_api.domain.bookCopy;
 
 import br.com.Library_api.domain.book.Book;
 import br.com.Library_api.dto.bookCopy.BookCopyRegisterDTO;
+import br.com.Library_api.dto.bookCopy.PutBookCopyDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -19,8 +21,9 @@ public class BookCopy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
+    @JsonBackReference
     private Book book;
 
     private String inventoryCode;
@@ -36,4 +39,13 @@ public class BookCopy {
     public void bookCopyNotAvailable(){
         this.available = false;
     }
+
+    public void bookCopyAvailable(){
+        this.available = true;
+    }
+
+    public void updateBookCopy(PutBookCopyDTO data){
+        if (data.inventoryCode() != null) this.inventoryCode = data.inventoryCode();
+    }
+
 }
