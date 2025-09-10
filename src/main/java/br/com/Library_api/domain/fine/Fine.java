@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = "id")
 public class Fine {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
@@ -30,6 +30,13 @@ public class Fine {
     private LocalDate issuedDate;
 
     private Boolean paid;
+
+    public Fine (Loan loan, BigDecimal amount){
+        this.loan = loan;
+        this.amount = amount;
+        this.issuedDate = LocalDate.now();
+        this.paid = false;
+    }
 
     public void finePaid(){
         this.paid = true;

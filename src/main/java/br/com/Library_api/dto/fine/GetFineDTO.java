@@ -1,18 +1,17 @@
 package br.com.Library_api.dto.fine;
 
 import br.com.Library_api.domain.fine.Fine;
-import br.com.Library_api.dto.loan.GetSummaryLoanDTO;
+import br.com.Library_api.dto.loan.GetLoanSummaryDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record GetFineDTO (Long id, GetSummaryLoanDTO loan, BigDecimal amount, LocalDate issuedDate, Boolean paid){
+public record GetFineDTO (Long id, GetLoanSummaryDTO loan, BigDecimal amount, LocalDate issuedDate, Boolean paid){
     public GetFineDTO (Fine fine){
         this(
                 fine.getId(),
 
-                new GetSummaryLoanDTO(fine.getLoan().getId(), fine.getLoan().getUser().getName(),
-                        fine.getLoan().getLoanDate(), fine.getLoan().getDueDate(), fine.getLoan().getReturnDate()),
+                new GetLoanSummaryDTO(fine.getLoan()),
 
                 fine.getAmount(),
                 fine.getIssuedDate(),

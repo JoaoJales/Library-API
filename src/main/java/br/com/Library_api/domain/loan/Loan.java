@@ -39,6 +39,8 @@ public class Loan {
     @Enumerated(value = EnumType.STRING)
     private LoanStatus loanStatus;
 
+    private int renewals;
+
     public Loan (LoanRegisterDTO data, User user, BookCopy bookCopy){
         this.bookCopy = bookCopy;
         this.user = user;
@@ -46,6 +48,7 @@ public class Loan {
         this.dueDate = data.dueDate();
         this.returnDate = null;
         this.loanStatus = LoanStatus.ACTIVE;
+        this.renewals = 0;
     }
 
     public void returnLoan(){
@@ -55,5 +58,10 @@ public class Loan {
 
     public void lateLoan(){
         this.loanStatus = LoanStatus.LATE;
+    }
+
+    public void renewLoan(int extraDays){
+        this.dueDate = this.getDueDate().plusDays(extraDays);
+        this.renewals++;
     }
 }
