@@ -1,5 +1,10 @@
 package br.com.Library_api.domain.user;
 
+import br.com.Library_api.domain.fine.FineRepository;
+import br.com.Library_api.domain.loan.LoanRepository;
+import br.com.Library_api.domain.loan.LoanStatus;
+import br.com.Library_api.dto.fine.GetFineDTO;
+import br.com.Library_api.dto.loan.GetLoanSummaryDTO;
 import br.com.Library_api.dto.user.GetDetailingUserDTO;
 import br.com.Library_api.dto.user.GetUsersDTO;
 import br.com.Library_api.dto.user.PutUserDTO;
@@ -12,12 +17,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final LoanRepository loanRepository;
+    private final FineRepository fineRepository;
 
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, LoanRepository loanRepository, FineRepository fineRepository){
         this.userRepository = userRepository;
+        this.loanRepository = loanRepository;
+        this.fineRepository = fineRepository;
     }
 
     @Transactional
@@ -74,4 +85,25 @@ public class UserService {
 
         return user.get();
     }
+
+    public Page<GetLoanSummaryDTO> getUserLoanHistory(Pageable pageable ,Long id) {
+        return loanRepository.findLoanHistoryByUser(pageable, id).map(GetLoanSummaryDTO::new);
+    }
+
+    public Page<GetLoanSummaryDTO> getUserActiveLoans(Pageable pageable, Long id) {
+        return loanRepository.findLoansByUserAndLoanStatus(pageable, id, LoanStatus.ACTIVE).map(GetLoanSummaryDTO::new);
+    }
+
+    public Page<GetLoanSummaryDTO> getUserLateLoans(Pageable pageable, Long id) {
+        return loanRepository.findLoansByUserAndLoanStatus(pageable, id, LoanStatus.LATE).map(GetLoanSummaryDTO::new);
+    }
+
+    public Page<GetFineDTO> getFinesPaid(Pageable pageable ,Long id) {
+        return fineRepository.findFinesByUserIdAndPaidStatus(pageable, id, true).map(GetFineDTO::new);
+    }
+
+    public Page<GetFineDTO> getFinesUnpaid(Pageable pageable ,Long id) {
+        return fineRepository.findFinesByUserIdAndPaidStatus(pageable, id, false).map(GetFineDTO::new);
+    }
+
 }

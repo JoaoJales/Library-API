@@ -2,13 +2,12 @@ package br.com.Library_api.controller;
 
 import br.com.Library_api.domain.book.Book;
 import br.com.Library_api.domain.book.BookService;
-import br.com.Library_api.dto.book.BookRegisterDTO;
-import br.com.Library_api.dto.book.GetBooksDTO;
-import br.com.Library_api.dto.book.GetDetailingBookDTO;
-import br.com.Library_api.dto.book.PutBookDTO;
+import br.com.Library_api.dto.book.*;
+import br.com.Library_api.dto.bookCopy.GetBookCopyDTO;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +50,19 @@ public class BookController {
         var bookDto = bookService.putBook(data);
 
         return ResponseEntity.ok().body(bookDto);
+    }
+
+    @GetMapping("/{id}/copies")
+    public ResponseEntity<BookCopiesResponseDTO> getBookCopies(@PageableDefault(size = 10, sort = "id") Pageable pageable, @PathVariable Long id){
+        BookCopiesResponseDTO dto = bookService.getBookCopiesByBook(pageable, id);
+
+        return ResponseEntity.ok().body(dto);
+    }
+
+    @GetMapping("/{id}/loans")
+    public ResponseEntity getLoansByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
+        var dto = bookService.getLoansByBook(pageable, id);
+
+        return ResponseEntity.ok().body(dto);
     }
 }

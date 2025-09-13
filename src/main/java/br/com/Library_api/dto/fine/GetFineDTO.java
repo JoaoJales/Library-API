@@ -6,10 +6,11 @@ import br.com.Library_api.dto.loan.GetLoanSummaryDTO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record GetFineDTO (Long id, GetLoanSummaryDTO loan, BigDecimal amount, LocalDate issuedDate, Boolean paid){
+public record GetFineDTO (Long id, String username, GetLoanSummaryDTO loan, BigDecimal amount, LocalDate issuedDate, Boolean paid){
     public GetFineDTO (Fine fine){
         this(
                 fine.getId(),
+                fine.getLoan().getUser().getName(),
 
                 new GetLoanSummaryDTO(fine.getLoan()),
 

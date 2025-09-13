@@ -156,4 +156,12 @@ public class LoanService {
 
         return loan.get();
     }
+
+    public Page<GetLoanDTO> getActiveLoans(Pageable pageable) {
+        return loanRepository.findAllByLoanStatus(pageable ,LoanStatus.ACTIVE).map(GetLoanDTO::new);
+    }
+
+    public Page<GetLoanDTO> getLateLoans(Pageable pageable) {
+        return loanRepository.findAllByLoanStatus(pageable ,LoanStatus.LATE).map(GetLoanDTO::new);
+    }
 }

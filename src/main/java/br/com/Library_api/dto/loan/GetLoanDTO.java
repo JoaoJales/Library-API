@@ -5,7 +5,7 @@ import br.com.Library_api.domain.loan.LoanStatus;
 
 import java.time.LocalDate;
 
-public record GetLoanDTO(Long id, String user, String titleBook, String copy, LocalDate laonDate, LocalDate dueDate, LocalDate returnDate, LoanStatus status, int renewals) {
+public record GetLoanDTO(Long id, String userName, String titleBook, String copy, LocalDate loanDate, LocalDate dueDate, LocalDate returnDate, LoanStatus status, int renewals) {
     public GetLoanDTO(Loan loan){
         this(loan.getId(),
                 loan.getUser().getName(),

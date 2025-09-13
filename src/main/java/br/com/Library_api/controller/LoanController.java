@@ -7,6 +7,7 @@ import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,6 +63,20 @@ public class LoanController {
     public ResponseEntity<GetLoanDTO> renewLoan(@PathVariable Long id) {
         GetLoanDTO dto = loanService.renewLoan(id);
         return ResponseEntity.ok().body(dto);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<Page<GetLoanDTO>> getActiveLoans (@PageableDefault(size = 10, sort = "loanDate", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<GetLoanDTO> page = loanService.getActiveLoans(pageable);
+
+        return ResponseEntity.ok().body(page);
+    }
+
+    @GetMapping("/late")
+    public ResponseEntity<Page<GetLoanDTO>> getLateLoans (@PageableDefault(size = 10, sort = "loanDate", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<GetLoanDTO> page = loanService.getLateLoans(pageable);
+
+        return ResponseEntity.ok().body(page);
     }
 
 

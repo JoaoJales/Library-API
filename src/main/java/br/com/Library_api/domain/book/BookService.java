@@ -2,10 +2,13 @@ package br.com.Library_api.domain.book;
 
 import br.com.Library_api.domain.author.Author;
 import br.com.Library_api.domain.author.AuthorRepository;
-import br.com.Library_api.dto.book.BookRegisterDTO;
-import br.com.Library_api.dto.book.GetBooksDTO;
-import br.com.Library_api.dto.book.GetDetailingBookDTO;
-import br.com.Library_api.dto.book.PutBookDTO;
+import br.com.Library_api.domain.bookCopy.BookCopy;
+import br.com.Library_api.domain.bookCopy.BookCopyRepository;
+import br.com.Library_api.domain.loan.Loan;
+import br.com.Library_api.domain.loan.LoanRepository;
+import br.com.Library_api.dto.book.*;
+import br.com.Library_api.dto.bookCopy.GetBookCopyDTO;
+import br.com.Library_api.dto.loan.GetLoanDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,11 +22,14 @@ import java.util.Optional;
 public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
+    private final BookCopyRepository bookCopyRepository;
+    private final LoanRepository loanRepository;
 
-    public BookService (BookRepository bookRepository, AuthorRepository authorRepository) {
+    public BookService (BookRepository bookRepository, AuthorRepository authorRepository, BookCopyRepository bookCopyRepository, LoanRepository loanRepository) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
-
+        this.bookCopyRepository = bookCopyRepository;
+        this.loanRepository = loanRepository;
     }
 
     @Transactional
@@ -71,5 +77,25 @@ public class BookService {
         return book.get();
     }
 
+    public BookCopiesResponseDTO getBookCopiesByBook(Pageable pageable, Long id) {
+        Page<BookCopy> copies = bookCopyRepository.findCopiesByBook(pageable, id);
+
+        Long total = copies.getTotalElements();
+        Long available = copies.stream().filter(BookCopy::getAvailable).count();
+        Long borrowed = total - available;
+
+        return new BookCopiesResponseDTO(
+                new BookCopiesResponseDTO.BookCopiesSummaryDTO(total, available, borrowed),
+                copies.map(GetBookCopyDTO::new)
+        );
+    }
+
+    public LoansResponseDTO getLoansByBook(Pageable pageable, Long id) {
+        Page<Loan> loans =  loanRepository.findLoansByBook(pageable, id);
+
+        Long total = loans.getTotalElements();
+
+        return new LoansResponseDTO(new LoansResponseDTO.LoansDataSummaryDTO(total), loans.map(GetLoanDTO::new));
+    }
 }
 

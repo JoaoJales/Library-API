@@ -4,6 +4,8 @@ import br.com.Library_api.domain.loan.Loan;
 import br.com.Library_api.dto.fine.GetFineDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -65,5 +67,9 @@ public class FineService {
         };
 
         return dailyRate.multiply(BigDecimal.valueOf(daysLate));
+    }
+
+    public Page<GetFineDTO> getFines(Pageable pageable) {
+        return fineRepository.findAll(pageable).map(GetFineDTO::new);
     }
 }
