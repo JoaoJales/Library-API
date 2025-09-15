@@ -11,8 +11,19 @@ import java.util.Optional;
 public interface BookCopyRepository extends JpaRepository<BookCopy, Long> {
     boolean existsByInventoryCode(String inventoryCode);
 
-    Optional<BookCopy> findByInventoryCode(@NotBlank String s);
+    Page<BookCopy> findAllByActiveTrue(Pageable pageable);
 
-    @Query("SELECT bc FROM BookCopy bc WHERE bc.book.id = :id")
+    Optional<BookCopy> findByInventoryCodeAndActiveTrue(@NotBlank String s);
+
+    @Query("SELECT bc FROM BookCopy bc WHERE bc.book.id = :id AND bc.active = true AND bc.book.active = true")
     Page<BookCopy> findCopiesByBook(Pageable pageable, Long id);
+
+    Optional<BookCopy> findByIdAndActiveTrue(Long id);
+
+    @Query("""
+    SELECT COUNT(bc) FROM BookCopy bc
+    WHERE bc.book.id = :bookId
+      AND bc.active = true
+    """)
+    long countActiveBookCopiesByBook(Long bookId);
 }

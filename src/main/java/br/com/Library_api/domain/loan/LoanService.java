@@ -4,11 +4,13 @@ import br.com.Library_api.domain.bookCopy.BookCopy;
 import br.com.Library_api.domain.bookCopy.BookCopyRepository;
 import br.com.Library_api.domain.fine.FineRepository;
 import br.com.Library_api.domain.fine.FineService;
+import br.com.Library_api.domain.loan.validations.createLoan.ValidatorCreateLoanService;
 import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserRepository;
 import br.com.Library_api.domain.user.UserType;
 import br.com.Library_api.dto.loan.GetLoanDTO;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,51 +29,25 @@ public class LoanService {
     private final BookCopyRepository bookCopyRepository;
     private final FineService fineService;
     private final FineRepository fineRepository;
+    private final List<ValidatorCreateLoanService> validatorsCreateLoan;
 
-    public LoanService (LoanRepository loanRepository, UserRepository userRepository, BookCopyRepository bookCopyRepository, FineService fineService, FineRepository fineRepository){
+    public LoanService (LoanRepository loanRepository, UserRepository userRepository, BookCopyRepository bookCopyRepository, FineService fineService, FineRepository fineRepository, List<ValidatorCreateLoanService> validatorsCreateLoan){
         this.loanRepository = loanRepository;
         this.userRepository = userRepository;
         this.bookCopyRepository = bookCopyRepository;
         this.fineService = fineService;
         this.fineRepository = fineRepository;
+        this.validatorsCreateLoan = validatorsCreateLoan;
     }
 
     @Transactional
     public Loan createLoan(LoanRegisterDTO data) {
-        if (!userRepository.existsById(data.userId())){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found. The provided userId does not exist");
-        }
+        BookCopy bookCopy = bookCopyRepository.findByInventoryCodeAndActiveTrue(data.bookCopyInventoryCode())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book copy Not Found or is not active."));
 
-        BookCopy bookCopy = bookCopyRepository.findByInventoryCode(data.bookCopyInventoryCode())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book copy Not Found. The provided bookCopy InventoryCode does not exist"));
+        User user = userRepository.findByIdAndActiveTrue(data.userId()).orElseThrow(() -> new EntityNotFoundException("User Not Found or is not active."));
 
-        User user = userRepository.findById(data.userId()).get();
-
-        if (loanRepository.existsByLoanStatusAndUserId(LoanStatus.LATE, user.getId())){
-            throw new IllegalStateException("This user has an overdue loan. Please return the book and pay the fine to be eligible for a new loan.");
-        }
-
-        if (fineRepository.existsByLoan_UserIdAndPaid(data.userId(), false)){
-            throw new IllegalStateException("This user has an outstanding fine. Please pay your fine to be eligible for a new loan.");
-        }
-
-        if (!bookCopy.getAvailable()){
-            throw new IllegalStateException("This book copy is not available.");
-        }
-
-        if (user.getUserType() == UserType.VISITOR){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Visitors are not allowed to take out loans.");
-        }
-
-        //Verifica a quantidade de Loans feito pelo usuário
-        long activeLoans = loanRepository.countActiveLoansByUser(data.userId());
-        if (user.getUserType() == UserType.STUDENT && activeLoans >= 3) {
-            throw new IllegalStateException("Student cannot have more than 3 active loans.");
-        }
-
-        if (user.getUserType() == UserType.PROFESSOR && activeLoans >= 5) {
-            throw new IllegalStateException("Professor cannot have more than 5 active loans.");
-        }
+        validatorsCreateLoan.forEach(v -> v.validate(data));
 
         Loan loan = new Loan(data, user ,bookCopy);
         loanRepository.save(loan);
@@ -82,7 +59,7 @@ public class LoanService {
     }
 
     public Page<GetLoanDTO> getLoans(Pageable pageable) {
-        return loanRepository.findAll(pageable).map(GetLoanDTO::new);
+        return loanRepository.findAllByEntitiesActives(pageable).map(GetLoanDTO::new);
     }
 
 
@@ -106,7 +83,6 @@ public class LoanService {
 
         loanRepository.save(loan);
         return new GetLoanDTO(loan);
-
     }
 
     @Transactional
@@ -148,10 +124,10 @@ public class LoanService {
 
 
     private Loan findLoan(Long id) {
-        Optional<Loan> loan = loanRepository.findById(id);
+        Optional<Loan> loan = loanRepository.findByIdAndEntitiesActive(id);
 
         if (loan.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan Not Found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Loan Not Found or ");
         }
 
         return loan.get();

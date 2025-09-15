@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 public class FineService {
@@ -34,6 +35,10 @@ public class FineService {
         return new GetFineDTO(fine);
     }
 
+    public Page<GetFineDTO> getFines(Pageable pageable) {
+        return fineRepository.findAllByUserActive(pageable).map(GetFineDTO::new);
+    }
+
     @Transactional
     public GetFineDTO finePaid(Long id) {
         Fine fine = findFine(id);
@@ -45,17 +50,19 @@ public class FineService {
     }
 
     private Fine findFine(Long id) {
-        if (!fineRepository.existsById(id)){
-            throw new EntityNotFoundException("Fine not found");
+        Optional<Fine> fine = fineRepository.findByIdAndRelatedUserActive(id);
+
+        if (fine.isEmpty()){
+            throw new EntityNotFoundException("Fine not found or related user are inactive.");
         }
 
-        return fineRepository.findById(id).get();
+        return fine.get();
     }
 
     private BigDecimal calculateFine(Loan loan) {
         LocalDate today = LocalDate.now();
         if (loan.getReturnDate() == null || !loan.getReturnDate().isAfter(loan.getDueDate())) {
-            return BigDecimal.ZERO; // sem multa
+            return BigDecimal.ZERO;
         }
 
         long daysLate = ChronoUnit.DAYS.between(loan.getDueDate(), loan.getReturnDate());
@@ -67,9 +74,5 @@ public class FineService {
         };
 
         return dailyRate.multiply(BigDecimal.valueOf(daysLate));
-    }
-
-    public Page<GetFineDTO> getFines(Pageable pageable) {
-        return fineRepository.findAll(pageable).map(GetFineDTO::new);
     }
 }

@@ -47,19 +47,19 @@ public class UserController {
         return ResponseEntity.ok(page);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<GetDetailingUserDTO> getDetailingUser(@PathVariable Long id){
         GetDetailingUserDTO detailingUser = userService.getDetailingUser(id);
 
         return ResponseEntity.ok(detailingUser);
     }
 
-//    @DeleteMapping("{id}")
-//    public ResponseEntity deleteUser(@PathVariable Long id){
-//        userService.deleteUser(id);
-//
-//        return ResponseEntity.noContent().build();
-//    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteUser(@PathVariable Long id){
+        userService.deleteUser(id);
+
+        return ResponseEntity.noContent().build();
+    }
 
     @GetMapping("/{id}/loans")
     public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLoanHistory (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {

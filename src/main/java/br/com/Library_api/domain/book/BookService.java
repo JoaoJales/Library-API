@@ -40,16 +40,16 @@ public class BookService {
 
         Author author = authorRepository.findById(data.authorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author Not Found"));
         Book book = new Book(data, author);
-        author.getBooks().add(book);
+
+        // não é preciso: authorRepository.save(author); e author.getBooks().add(book);
 
         bookRepository.save(book);
-        authorRepository.save(author);
 
         return book;
     }
 
     public Page<GetBooksDTO> getBooks(Pageable pageable) {
-        return bookRepository.findAll(pageable).map(GetBooksDTO::new);
+        return bookRepository.findAllByActiveTrue(pageable).map(GetBooksDTO::new);
     }
 
     public GetDetailingBookDTO getDetailingBook (Long id){
@@ -67,11 +67,25 @@ public class BookService {
         return new GetDetailingBookDTO(book);
     }
 
+    @Transactional
+    public void deleteBook(Long id) {
+        Book book = findBook(id);
+
+        long bookCopiesActives = bookCopyRepository.countActiveBookCopiesByBook(book.getId());
+
+        if (bookCopiesActives > 0){
+            throw new IllegalStateException("The book cannot be deactivated while it has active copies.");
+        }
+
+        book.deleteBook();
+        bookRepository.save(book);
+    }
+
     private Book findBook(Long id){
-        Optional<Book> book = bookRepository.findById(id);
+        Optional<Book> book = bookRepository.findByIdAndActiveTrue(id);
 
         if (book.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found or is not active");
         }
 
         return book.get();

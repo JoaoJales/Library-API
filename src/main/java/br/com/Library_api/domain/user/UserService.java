@@ -44,10 +44,6 @@ public class UserService {
 
     @Transactional
     public User updateUser(@Valid PutUserDTO data) {
-        if (!userRepository.existsById(data.id())){
-            throw new IllegalArgumentException("user id not found");
-        }
-
         if (userRepository.existsByEmail(data.email())){
             throw new IllegalArgumentException("email already registered");
         }
@@ -60,7 +56,7 @@ public class UserService {
     }
 
     public Page<GetUsersDTO> getUsers(Pageable pageable){
-        return userRepository.findAll(pageable).map(GetUsersDTO::new);
+        return userRepository.findAllByActiveTrue(pageable).map(GetUsersDTO::new);
     }
 
     public GetDetailingUserDTO getDetailingUser(Long id){
@@ -72,15 +68,21 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         var user = findUser(id);
-//        user.deleteUser();
+        long activeLoans = loanRepository.countActiveLoansByUser(user.getId());
+
+        if (activeLoans > 0){
+            throw new IllegalStateException("The user cannot be deactivated while having active loans.");
+        }
+
+        user.deleteUser();
         userRepository.save(user);
     }
 
     private User findUser(Long id){
-        var user = userRepository.findById(id);
+        var user = userRepository.findByIdAndActiveTrue(id);
 
         if (user.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found or is not active");
         }
 
         return user.get();

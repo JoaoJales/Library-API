@@ -29,6 +29,8 @@ public class User {
 
     private String phone;
 
+    private boolean active;
+
     @Embedded
     private Address address;
 
@@ -41,6 +43,7 @@ public class User {
         this.email = data.email();
         this.phone = data.phone();
         this.userType = data.userType();
+        this.active = true;
         this.address = new Address(data.address());
     }
 
@@ -51,6 +54,10 @@ public class User {
         if (data.address() != null){
             this.address.updateInfoAddress(data.address());
         }
+    }
+
+    public void deleteUser(){
+        this.active = false;
     }
 
 }

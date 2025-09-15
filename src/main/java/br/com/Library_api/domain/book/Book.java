@@ -36,6 +36,8 @@ public class Book {
 
     private String isbn;
 
+    private boolean active;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     @JsonBackReference
@@ -52,6 +54,7 @@ public class Book {
         this.genre = data.genre();
         this.isbn = data.isbn();
         this.author = author;
+        this.active = true;
     }
 
     public void updateInfoBook(PutBookDTO data){
@@ -59,5 +62,9 @@ public class Book {
         if (data.publicationYear() != null) this.publicationYear = data.publicationYear();
         if (data.publisher() != null) this.publisher = data.publisher();
         if (data.genre() != null) this.genre = data.genre();
+    }
+
+    public void deleteBook() {
+        this.active = false;
     }
 }

@@ -52,4 +52,11 @@ public class BookCopyController {
 
         return ResponseEntity.ok().body(getBookCopyDTO);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteBookCopy (@PathVariable Long id) {
+        bookCopyService.deleteBookCopy(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -2,6 +2,7 @@ package br.com.Library_api.domain.bookCopy;
 
 import br.com.Library_api.domain.book.Book;
 import br.com.Library_api.domain.book.BookRepository;
+import br.com.Library_api.domain.loan.LoanRepository;
 import br.com.Library_api.dto.bookCopy.BookCopyRegisterDTO;
 import br.com.Library_api.dto.bookCopy.GetBookCopyDTO;
 import br.com.Library_api.dto.bookCopy.GetDetailingBookCopyDTO;
@@ -20,10 +21,12 @@ import java.util.Optional;
 public class BookCopyService {
     private final BookCopyRepository bookCopyRepository;
     private final BookRepository bookRepository;
+    private final LoanRepository loanRepository;
 
-    public BookCopyService (BookCopyRepository bookCopyRepository, BookRepository bookRepository){
+    public BookCopyService (BookCopyRepository bookCopyRepository, BookRepository bookRepository, LoanRepository loanRepository){
         this.bookCopyRepository = bookCopyRepository;
         this.bookRepository = bookRepository;
+        this.loanRepository = loanRepository;
     }
 
     @Transactional
@@ -32,23 +35,22 @@ public class BookCopyService {
             throw new IllegalArgumentException("The inventory code you entered already exists");
         }
 
-        if (!bookRepository.existsById(data.bookId())){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book Not Found. The provided bookId does not exist");
+        Optional<Book> book = bookRepository.findByIdAndActiveTrue(data.bookId());
+        if (book.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book Not Found or is not active.");
         }
 
-        Book book = bookRepository.findById(data.bookId()).get();
-        BookCopy bookCopy = new BookCopy(data, book);
+        BookCopy bookCopy = new BookCopy(data, book.get());
 
-        book.getCopies().add(bookCopy); // não é precido salvar o book separadamente.
+         // não é precido salvar o book separadamente ou fazer book.get().getCopies().add(bookCopy);.
 
         bookCopyRepository.save(bookCopy);
         return bookCopy;
     }
 
     public Page<GetBookCopyDTO> getBookCopies(Pageable pageable) {
-        return bookCopyRepository.findAll(pageable).map(GetBookCopyDTO::new);
+        return bookCopyRepository.findAllByActiveTrue(pageable).map(GetBookCopyDTO::new);
     }
-
 
     public GetDetailingBookCopyDTO getDetalingBookCopy(Long id) {
         BookCopy bookCopy = findBookCopy(id);
@@ -66,12 +68,24 @@ public class BookCopyService {
         return new GetBookCopyDTO(bookCopy);
     }
 
+    @Transactional
+    public void deleteBookCopy(Long id) {
+        BookCopy bookCopy = findBookCopy(id);
+        long activeLoans = loanRepository.countActiveLoansByBookCopy(bookCopy.getId());
+
+        if (activeLoans > 0){
+            throw new IllegalStateException("The user cannot be deactivated while having active loans.");
+        }
+
+        bookCopy.deleteBookCopy();
+        bookCopyRepository.save(bookCopy);
+    }
 
     private BookCopy findBookCopy (Long id){
-        Optional<BookCopy> bookCopy = bookCopyRepository.findById(id);
+        Optional<BookCopy> bookCopy = bookCopyRepository.findByIdAndActiveTrue(id);
 
         if (bookCopy.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book Copy Not Found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book Copy Not Found or is not active");
         }
 
         return bookCopy.get();

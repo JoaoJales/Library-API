@@ -30,10 +30,13 @@ public class BookCopy {
 
     private Boolean available;
 
+    private boolean active;
+
     public BookCopy (BookCopyRegisterDTO data, Book book){
         this.book = book;
         this.inventoryCode = data.inventoryCode();
         this.available = true;
+        this.active = true;
     }
 
     public void bookCopyNotAvailable(){
@@ -46,6 +49,10 @@ public class BookCopy {
 
     public void updateBookCopy(PutBookCopyDTO data){
         if (data.inventoryCode() != null) this.inventoryCode = data.inventoryCode();
+    }
+
+    public void deleteBookCopy(){
+        this.active = false;
     }
 
 }
