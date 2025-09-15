@@ -1,11 +1,14 @@
 package br.com.Library_api.domain.loan;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public interface LoanRepository extends JpaRepository<Loan, Long> {
@@ -79,4 +82,13 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
       AND l.bookCopy.book.active = true
     """)
     Optional<Loan> findByIdAndEntitiesActive(Long id);
+
+    @Modifying
+    @Transactional
+    @Query("""
+            UPDATE Loan l
+            SET l.loanStatus = 'LATE'
+            WHERE l.dueDate <= :now AND l.loanStatus = 'ACTIVE'
+            """)
+    void updateLoansToLate(LocalDate now);
 }
