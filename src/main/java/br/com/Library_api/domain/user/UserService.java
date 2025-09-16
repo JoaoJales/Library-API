@@ -5,15 +5,14 @@ import br.com.Library_api.domain.loan.LoanRepository;
 import br.com.Library_api.domain.loan.LoanStatus;
 import br.com.Library_api.dto.fine.GetFineDTO;
 import br.com.Library_api.dto.loan.GetLoanSummaryDTO;
-import br.com.Library_api.dto.user.GetDetailingUserDTO;
-import br.com.Library_api.dto.user.GetUsersDTO;
-import br.com.Library_api.dto.user.PutUserDTO;
-import br.com.Library_api.dto.user.UserRegisterDTO;
+import br.com.Library_api.dto.user.*;
+import br.com.Library_api.infra.security.SecurityService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,11 +23,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final LoanRepository loanRepository;
     private final FineRepository fineRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final SecurityService securityService;
 
-    public UserService(UserRepository userRepository, LoanRepository loanRepository, FineRepository fineRepository){
+    public UserService(UserRepository userRepository, LoanRepository loanRepository,
+                       FineRepository fineRepository, PasswordEncoder passwordEncoder, SecurityService securityService){
         this.userRepository = userRepository;
         this.loanRepository = loanRepository;
         this.fineRepository = fineRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.securityService = securityService;
     }
 
     @Transactional
@@ -37,7 +41,9 @@ public class UserService {
             throw new IllegalArgumentException("email already registered");
         }
 
-        var user = new User(data);
+        String password = passwordEncoder.encode(data.password());
+
+        var user = new User(data, password);
         userRepository.save(user);
         return user;
     }
@@ -106,6 +112,25 @@ public class UserService {
 
     public Page<GetFineDTO> getFinesUnpaid(Pageable pageable ,Long id) {
         return fineRepository.findFinesByUserIdAndPaidStatus(pageable, id, false).map(GetFineDTO::new);
+    }
+
+    public User alterPassword(@Valid PutPasswordDTO data) {
+        var userLogged = securityService.getPrincipalUserLogged();
+
+        if (data.oldPassword().equals(data.newPassword())){
+            throw new IllegalArgumentException("The new password must be different from the current password");
+        }
+
+        var isOldPasswordCorrect = passwordEncoder.matches(data.oldPassword(), userLogged.getPassword());
+
+        if (!isOldPasswordCorrect){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password incorrect");
+        }
+
+        userLogged.updatePassword(passwordEncoder.encode(data.newPassword()));
+        userRepository.save(userLogged);
+
+        return userLogged;
     }
 
 }
