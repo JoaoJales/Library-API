@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -23,6 +24,8 @@ public class LoanController {
     }
 
     @PostMapping
+//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#data.userId == authentication.principal.id or hasRole('ADMIN'))") // --> test rule
     public ResponseEntity<GetLoanDTO> postLoan(@RequestBody @Valid LoanRegisterDTO data, UriComponentsBuilder uriBuilder) {
         Loan loan = loanService.createLoan(data);
 
@@ -32,6 +35,7 @@ public class LoanController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<GetLoanDTO>> getLoans (@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         Page<GetLoanDTO> page = loanService.getLoans(pageable);
 
@@ -39,6 +43,7 @@ public class LoanController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')") //verificar se o loan pertence ao usuário logado
     public ResponseEntity<GetLoanDTO> getDetailingLoan (@PathVariable Long id) {
         GetLoanDTO dto = loanService.getDetalingLoan(id);
 
@@ -46,6 +51,9 @@ public class LoanController {
     }
 
     @PatchMapping("{id}/return")
+//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")  // -->  test rule
+    //verificar se o loan pertence ao usuário logado
     public ResponseEntity<GetLoanDTO> returnLoan(@PathVariable Long id){
         GetLoanDTO dto = loanService.returnLoan(id);
 
@@ -53,19 +61,22 @@ public class LoanController {
     }
 
     @PatchMapping("{id}/late")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetLoanDTO> lateLoan(@PathVariable Long id){
         GetLoanDTO dto = loanService.setlateLoan(id);
 
         return ResponseEntity.ok().body(dto);
     }
 
-    @PatchMapping("/{id}/renew")
+    @PatchMapping("/{id}/renew") //Caso adiciona a reserva de livros -- verificar se alguem já reservou o livro antes de possibilitar o renew
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<GetLoanDTO> renewLoan(@PathVariable Long id) {
         GetLoanDTO dto = loanService.renewLoan(id);
         return ResponseEntity.ok().body(dto);
     }
 
     @GetMapping("/active")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<Page<GetLoanDTO>> getActiveLoans (@PageableDefault(size = 10, sort = "loanDate", direction = Sort.Direction.ASC) Pageable pageable){
         Page<GetLoanDTO> page = loanService.getActiveLoans(pageable);
 
@@ -73,6 +84,7 @@ public class LoanController {
     }
 
     @GetMapping("/late")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<Page<GetLoanDTO>> getLateLoans (@PageableDefault(size = 10, sort = "loanDate", direction = Sort.Direction.ASC) Pageable pageable){
         Page<GetLoanDTO> page = loanService.getLateLoans(pageable);
 

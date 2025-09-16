@@ -6,12 +6,12 @@ import br.com.Library_api.dto.author.AuthorRegisterDTO;
 import br.com.Library_api.dto.author.GetAuthorSummaryDTO;
 import br.com.Library_api.dto.author.GetDetailingAuthorDTO;
 import br.com.Library_api.dto.author.PutAuthorDTO;
-import br.com.Library_api.dto.user.GetDetailingUserDTO;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -25,6 +25,7 @@ public class AuthorController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingAuthorDTO> postAuthor(@RequestBody @Valid AuthorRegisterDTO data, UriComponentsBuilder uriBuilder){
         Author author = authorService.createAuthor(data);
 
@@ -34,6 +35,7 @@ public class AuthorController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
     public ResponseEntity<GetDetailingAuthorDTO> getAuthor(@PathVariable Long id){
         GetDetailingAuthorDTO dto = authorService.getDetailingAuthor(id);
 
@@ -41,6 +43,7 @@ public class AuthorController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
     public ResponseEntity<Page<GetAuthorSummaryDTO>> getAuthors(@PageableDefault(size = 10, sort = "id") Pageable pageable){
         Page<GetAuthorSummaryDTO> page = authorService.getAuthors(pageable);
 
@@ -48,16 +51,10 @@ public class AuthorController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingAuthorDTO> putAuthor(@RequestBody @Valid PutAuthorDTO data){
         GetDetailingAuthorDTO dto = authorService.putAuthor(data);
 
         return ResponseEntity.ok().body(dto);
-    }
-
-    @DeleteMapping
-    public ResponseEntity deleteAuthor(){
-//        authorService.deleteAuthor();
-
-        return ResponseEntity.noContent().build();
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -23,6 +24,7 @@ public class BookController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingBookDTO> postBook(@RequestBody @Valid BookRegisterDTO data, UriComponentsBuilder uriBuilder){
         Book book = bookService.createBook(data);
 
@@ -32,6 +34,7 @@ public class BookController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
     public ResponseEntity<Page<GetBooksDTO>> getBooks (@PageableDefault(size = 10, sort = "id") Pageable pageable){
        Page<GetBooksDTO> page = bookService.getBooks(pageable);
 
@@ -39,6 +42,7 @@ public class BookController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
     public ResponseEntity<GetDetailingBookDTO> getDetailingBook (@PathVariable Long id){
         GetDetailingBookDTO detailingBook = bookService.getDetailingBook(id);
 
@@ -46,6 +50,7 @@ public class BookController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingBookDTO> putBook(@RequestBody @Valid PutBookDTO data){
         var bookDto = bookService.putBook(data);
 
@@ -53,6 +58,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}/copies")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
     public ResponseEntity<BookCopiesResponseDTO> getBookCopies(@PageableDefault(size = 10, sort = "id") Pageable pageable, @PathVariable Long id){
         BookCopiesResponseDTO dto = bookService.getBookCopiesByBook(pageable, id);
 
@@ -60,6 +66,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}/loans")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity getLoansByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
         var dto = bookService.getLoansByBook(pageable, id);
 
@@ -67,6 +74,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity deleteBook (@PathVariable Long id){
         bookService.deleteBook(id);
 

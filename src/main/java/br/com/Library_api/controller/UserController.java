@@ -1,17 +1,16 @@
 package br.com.Library_api.controller;
 
+import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserService;
 import br.com.Library_api.dto.fine.GetFineDTO;
 import br.com.Library_api.dto.loan.GetLoanSummaryDTO;
-import br.com.Library_api.dto.user.GetDetailingUserDTO;
-import br.com.Library_api.dto.user.GetUsersDTO;
-import br.com.Library_api.dto.user.PutUserDTO;
-import br.com.Library_api.dto.user.UserRegisterDTO;
+import br.com.Library_api.dto.user.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -24,7 +23,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<GetDetailingUserDTO> postUser(@RequestBody @Valid UserRegisterDTO data, UriComponentsBuilder uriBuilder){
         var user = userService.createUser(data);
 
@@ -34,6 +33,7 @@ public class UserController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN') or #data.id == authentication.principal.id")
     public ResponseEntity<GetDetailingUserDTO> putUser(@RequestBody @Valid PutUserDTO data){
         var user = userService.updateUser(data);
 
@@ -41,6 +41,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<GetUsersDTO>> getUsers (@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         Page<GetUsersDTO> page = userService.getUsers(pageable);
 
@@ -48,6 +49,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public ResponseEntity<GetDetailingUserDTO> getDetailingUser(@PathVariable Long id){
         GetDetailingUserDTO detailingUser = userService.getDetailingUser(id);
 
@@ -55,13 +57,22 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity deleteUser(@PathVariable Long id){
         userService.deleteUser(id);
 
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/password")
+    public ResponseEntity alterPassword(@RequestBody @Valid PutPasswordDTO data){
+        User user = userService.alterPassword(data);
+
+        return ResponseEntity.ok().body(new GetSummaryDataLoginDTO(user.getEmail(), data.newPassword()));
+    }
+
     @GetMapping("/{id}/loans")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
     public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLoanHistory (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {
         Page<GetLoanSummaryDTO> page = userService.getUserLoanHistory(pageable,id);
 
@@ -69,6 +80,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/loans/active")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
     public ResponseEntity<Page<GetLoanSummaryDTO>> getUserActiveLoans (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {
         Page<GetLoanSummaryDTO> page = userService.getUserActiveLoans(pageable,id);
 
@@ -76,6 +88,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/loans/late")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLateLoans (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {
         Page<GetLoanSummaryDTO> page = userService.getUserLateLoans(pageable,id);
 
@@ -83,6 +96,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/fines/unpaid")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
     public ResponseEntity<Page<GetFineDTO>> getFinesUnpaid (@PageableDefault(size = 10) Pageable pageable, @PathVariable Long id) {
         Page<GetFineDTO> page = userService.getFinesUnpaid(pageable, id);
 
@@ -90,6 +104,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/fines/paid")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
     public ResponseEntity<Page<GetFineDTO>> getFinesPaid (@PageableDefault(size = 10) Pageable pageable, @PathVariable Long id) {
         Page<GetFineDTO> page = userService.getFinesPaid(pageable, id);
 

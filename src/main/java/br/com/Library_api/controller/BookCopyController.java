@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -24,6 +25,7 @@ public class BookCopyController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetBookCopyDTO> postBooks (@RequestBody @Valid BookCopyRegisterDTO data, UriComponentsBuilder uriBuilder) {
         BookCopy bookCopy = bookCopyService.createBookCopy(data);
 
@@ -33,13 +35,15 @@ public class BookCopyController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<GetBookCopyDTO>> getBooks (@PageableDefault(size = 10, sort = "id") Pageable pageable){
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
+    public ResponseEntity<Page<GetBookCopyDTO>> getBookCopies (@PageableDefault(size = 10, sort = "id") Pageable pageable){
         Page<GetBookCopyDTO> page = bookCopyService.getBookCopies(pageable);
 
         return ResponseEntity.ok().body(page);
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
     public ResponseEntity<GetDetailingBookCopyDTO> getDetailingBookCopy (@PathVariable Long id){
         GetDetailingBookCopyDTO data = bookCopyService.getDetalingBookCopy(id);
 
@@ -47,6 +51,7 @@ public class BookCopyController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetBookCopyDTO> putBookCopy (@RequestBody @Valid PutBookCopyDTO data) {
         GetBookCopyDTO getBookCopyDTO = bookCopyService.putBookCopy(data);
 
@@ -54,6 +59,7 @@ public class BookCopyController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity deleteBookCopy (@PathVariable Long id) {
         bookCopyService.deleteBookCopy(id);
 
