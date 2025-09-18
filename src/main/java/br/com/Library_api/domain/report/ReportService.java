@@ -36,7 +36,7 @@ public class ReportService {
         return reportRepositoryCustom.findBookAvailability(pageable);
     }
 
-    public Page<TopUsersMostFinesDTO> TopUsersMostFines(Pageable pageable) {
+    public Page<TopUsersMostFinesDTO> topUsersMostFines(Pageable pageable) {
         return reportRepositoryCustom.findTopUsersMostFines(pageable);
     }
 

@@ -61,7 +61,7 @@ public class ReportController {
 
     @GetMapping("/users/fines/top")
     public ResponseEntity<Page<TopUsersMostFinesDTO>> getTopUsersMostFines (@PageableDefault(size = 10) Pageable pageable){
-        Page<TopUsersMostFinesDTO> page = reportService.TopUsersMostFines(pageable);
+        Page<TopUsersMostFinesDTO> page = reportService.topUsersMostFines(pageable);
 
         return ResponseEntity.ok().body(page);
     }

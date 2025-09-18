@@ -27,6 +27,7 @@ public class ReportRepositoryCustom {
             JOIN l.bookCopy bc
             JOIN bc.book b
             JOIN b.author a
+            WHERE b.active = true
             GROUP BY b.id, b.title, a.name
             ORDER BY COUNT(l.id) DESC
         """;
@@ -36,7 +37,7 @@ public class ReportRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
 
         List<TopBorrowedBooksDTO> resultList = query.getResultList();
-        long total = em.createQuery("SELECT COUNT(DISTINCT b.id) FROM Loan l JOIN l.bookCopy bc JOIN bc.book b", Long.class)
+        long total = em.createQuery("SELECT COUNT(DISTINCT b.id) FROM Loan l JOIN l.bookCopy bc JOIN bc.book b WHERE b.active = true", Long.class)
                 .getSingleResult();
 
         return new PageImpl<>(resultList, pageable, total);
@@ -49,6 +50,7 @@ public class ReportRepositoryCustom {
             )
             FROM Loan l
             JOIN l.user u
+            WHERE u.active = true
             GROUP BY u.id, u.name, u.email
             ORDER BY COUNT(l.id) DESC
         """;
@@ -58,7 +60,7 @@ public class ReportRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
 
         List<TopUsersReadersDTO> resultList = query.getResultList();
-        long total = em.createQuery("SELECT COUNT(DISTINCT u.id) FROM Loan l JOIN l.user u", Long.class)
+        long total = em.createQuery("SELECT COUNT(DISTINCT u.id) FROM Loan l JOIN l.user u WHERE u.active = true", Long.class)
                 .getSingleResult();
 
         return new PageImpl<>(resultList, pageable, total);
@@ -102,6 +104,9 @@ public class ReportRepositoryCustom {
             JOIN l.bookCopy bc
             JOIN bc.book b
             WHERE l.returnDate IS NULL AND l.dueDate < CURRENT_DATE
+             AND u.active = true
+             AND bc.active = true
+             AND b.active = true
             ORDER BY l.dueDate ASC
         """;
 
@@ -110,7 +115,13 @@ public class ReportRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
 
         List<LateLoansRealTimeAdminDTO> resultList = query.getResultList();
-        long total = em.createQuery("SELECT COUNT(l.id) FROM Loan l WHERE l.returnDate IS NULL AND l.dueDate < CURRENT_DATE", Long.class)
+        long total = em.createQuery("""
+                        SELECT COUNT(l.id) FROM Loan l
+                        WHERE l.returnDate IS NULL AND l.dueDate < CURRENT_DATE
+                                AND u.active = true
+                                AND bc.active = true
+                                AND b.active = true
+                        """, Long.class)
                 .getSingleResult();
 
         return new PageImpl<>(resultList, pageable, total);
@@ -124,6 +135,7 @@ public class ReportRepositoryCustom {
 
                 FROM BookCopy bc
                 JOIN bc.book b
+                WHERE bc.active = true
                 GROUP BY b.id, b.title
                 ORDER BY COUNT(bc.id) ASC
                 """;
@@ -133,7 +145,7 @@ public class ReportRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
 
         List<BookAvailabilityDTO> resultList = query.getResultList();
-        long total = em.createQuery("SELECT COUNT(DISTINCT b.id) FROM BookCopy bc JOIN bc.book b", Long.class)
+        long total = em.createQuery("SELECT COUNT(DISTINCT b.id) FROM BookCopy bc JOIN bc.book b WHERE bc.active = true", Long.class)
                 .getSingleResult();
 
         return new PageImpl<>(resultList, pageable, total);
@@ -148,6 +160,7 @@ public class ReportRepositoryCustom {
                 FROM Fine f
                 JOIN f.loan l
                 JOIN l.user u
+                WHERE u.active = true
                 GROUP BY u.id, u.name, u.email
                 ORDER BY COUNT(f.id) DESC
                 """;
@@ -157,7 +170,7 @@ public class ReportRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
 
         List<TopUsersMostFinesDTO> list = query.getResultList();
-        long total = em.createQuery("SELECT COUNT(DISTINCT u.id) FROM Loan l JOIN l.user u", Long.class)
+        long total = em.createQuery("SELECT COUNT(DISTINCT u.id) From fine f JOIN f.user u", Long.class)
                 .getSingleResult();
 
         return new PageImpl<>(list, pageable, total);
@@ -171,7 +184,7 @@ public class ReportRepositoryCustom {
                 FROM Fine f
                 JOIN f.loan l
                 JOIN l.user u
-                WHERE f.paid = false
+                WHERE f.paid = false AND u.active = true
                 GROUP BY u.id, u.name, u.email, u.userType
                 ORDER BY COUNT(f.id) DESC
                 """;
@@ -181,7 +194,7 @@ public class ReportRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
 
         List<UsersDebtorsDTO> list = query.getResultList();
-        long total = em.createQuery("SELECT COUNT(DISTINCT u.id) FROM Fine f JOIN f.loan l JOIN l.user u WHERE f.paid = false", Long.class)
+        long total = em.createQuery("SELECT COUNT(DISTINCT u.id) FROM Fine f JOIN f.loan l JOIN l.user u WHERE f.paid = false AND u.active = true", Long.class)
                 .getSingleResult();
 
         return new PageImpl<>(list, pageable, total);
@@ -213,7 +226,7 @@ public class ReportRepositoryCustom {
             JOIN l.bookCopy bc
             JOIN bc.book b
             JOIN b.author a
-            WHERE l.loanDate BETWEEN :start AND :end
+            WHERE l.loanDate BETWEEN :start AND :end AND b.active = true
             GROUP BY b.id, b.title, a.name
             ORDER BY COUNT(l.id) DESC
         """;
@@ -233,7 +246,7 @@ public class ReportRepositoryCustom {
             FROM Loan l
             JOIN l.bookCopy bc
             JOIN bc.book b
-            WHERE l.loanDate BETWEEN :start AND :end
+            WHERE l.loanDate BETWEEN :start AND :end AND b.active = true
         """, Long.class)
                 .setParameter("start", start)
                 .setParameter("end", end)

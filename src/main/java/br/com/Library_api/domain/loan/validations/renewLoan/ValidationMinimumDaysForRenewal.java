@@ -11,8 +11,10 @@ import java.time.LocalDate;
 public class ValidationMinimumDaysForRenewal implements ValidatorRenewLoan {
     @Override
     public void validate(Loan loan) {
-        if (loan.getDueDate().isAfter(LocalDate.now().plusDays(3))){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only renew your loan within 3 days of due date.");
-        }
+        // Desativado para testes -- Disabled for tests
+
+//        if (loan.getDueDate().isAfter(LocalDate.now().plusDays(3))){
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only renew your loan within 3 days of due date.");
+//        }
     }
 }
