@@ -1,6 +1,5 @@
 package br.com.Library_api.domain.author;
 
-import br.com.Library_api.domain.user.User;
 import br.com.Library_api.dto.author.AuthorRegisterDTO;
 import br.com.Library_api.dto.author.GetAuthorSummaryDTO;
 import br.com.Library_api.dto.author.GetDetailingAuthorDTO;
@@ -24,7 +23,7 @@ public class AuthorService {
     @Transactional
     public Author createAuthor(@Valid AuthorRegisterDTO data) {
         if(authorRepository.existsByNameAndBirthDate(data.name(), data.birthDate())){
-            throw new IllegalArgumentException("Author with name and date of birth already registered");
+            throw new ResponseStatusException(HttpStatus.CONFLICT , "Author with name and date of birth already registered");
         }
 
         Author author = new Author(data);

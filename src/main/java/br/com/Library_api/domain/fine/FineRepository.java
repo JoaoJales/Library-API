@@ -31,4 +31,6 @@ public interface FineRepository extends JpaRepository<Fine, Long> {
     AND f.loan.user.active = true
     """)
     Optional<Fine> findByIdAndRelatedUserActive(Long id);
+
+    boolean existsByLoanId(Long id);
 }

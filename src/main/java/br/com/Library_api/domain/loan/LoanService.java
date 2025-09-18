@@ -4,13 +4,13 @@ import br.com.Library_api.domain.bookCopy.BookCopy;
 import br.com.Library_api.domain.bookCopy.BookCopyRepository;
 import br.com.Library_api.domain.fine.FineService;
 import br.com.Library_api.domain.loan.validations.createLoan.ValidatorCreateLoanService;
+import br.com.Library_api.domain.loan.validations.renewLoan.ValidatorRenewLoan;
 import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserRepository;
 import br.com.Library_api.domain.user.UserType;
 import br.com.Library_api.dto.loan.GetLoanDTO;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import br.com.Library_api.infra.security.SecurityService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,16 +28,19 @@ public class LoanService {
     private final BookCopyRepository bookCopyRepository;
     private final FineService fineService;
     private final List<ValidatorCreateLoanService> validatorsCreateLoan;
+    private final List<ValidatorRenewLoan> validatorsRenewLoan;
     private final SecurityService securityService;
 
     public LoanService (LoanRepository loanRepository, UserRepository userRepository,
                         BookCopyRepository bookCopyRepository, FineService fineService,
-                        List<ValidatorCreateLoanService> validatorsCreateLoan, SecurityService securityService){
+                        List<ValidatorCreateLoanService> validatorsCreateLoan, List<ValidatorRenewLoan> validatorsRenewLoan,
+                        SecurityService securityService){
         this.loanRepository = loanRepository;
         this.userRepository = userRepository;
         this.bookCopyRepository = bookCopyRepository;
         this.fineService = fineService;
         this.validatorsCreateLoan = validatorsCreateLoan;
+        this.validatorsRenewLoan = validatorsRenewLoan;
         this.securityService = securityService;
     }
 
@@ -47,15 +49,15 @@ public class LoanService {
         BookCopy bookCopy = bookCopyRepository.findByInventoryCodeAndActiveTrue(data.bookCopyInventoryCode())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book copy Not Found or is not active."));
 
-        User user = userRepository.findByIdAndActiveTrue(data.userId()).orElseThrow(() -> new EntityNotFoundException("User Not Found or is not active."));
+        User user = userRepository.findByIdAndActiveTrue(data.userId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found or is not active."));
 
         validatorsCreateLoan.forEach(v -> v.validate(data));
 
         Loan loan = new Loan(data, user ,bookCopy);
-        loanRepository.save(loan);
-
         bookCopy.bookCopyNotAvailable();
         bookCopyRepository.save(bookCopy);
+
+        loanRepository.save(loan);
 
         return loan;
     }
@@ -75,6 +77,9 @@ public class LoanService {
     @Transactional
     public GetLoanDTO returnLoan (Long id){
         Loan loan = findLoan(id);
+        if (loan.getLoanStatus() == LoanStatus.RETURNED){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Loan already returned");
+        }
         verifyLoanBelongsUserLogged(loan);
 
         loan.returnLoan();
@@ -90,30 +95,12 @@ public class LoanService {
         return new GetLoanDTO(loan);
     }
 
-    @Transactional
-    public GetLoanDTO setlateLoan(Long id) {
-        Loan loan = findLoan(id);
-        loan.lateLoan();
-
-        return new GetLoanDTO(loan);
-    }
 
     @Transactional
     public GetLoanDTO renewLoan(Long id) {
         Loan loan = findLoan(id);
         verifyLoanBelongsUserLogged(loan);
-
-        if (loan.getLoanStatus() != LoanStatus.ACTIVE) {
-            throw new IllegalStateException("Only active loans can be renewed.");
-        }
-
-        if (!loan.getDueDate().isAfter(LocalDate.now())) {
-            throw new IllegalStateException("Cannot renew on or after due date.");
-        }
-
-        if (loan.getRenewals() >= 2) {
-            throw new IllegalStateException("Maximum number of renewals reached.");
-        }
+        validatorsRenewLoan.forEach(l -> l.validate(loan));
 
         //Calcula os dias extras de acordo com o user Type
         int extraDays;
@@ -149,7 +136,7 @@ public class LoanService {
     private void verifyLoanBelongsUserLogged (Loan loan) {
         Long userLoggedId = securityService.getLoggedUserId();
 
-        if (loan.getUser().getId() != userLoggedId) {
+        if (!loan.getUser().getId().equals(userLoggedId)) {
             throw new IllegalArgumentException("Access denied. It is not possible to access loans from other users");
         }
     }

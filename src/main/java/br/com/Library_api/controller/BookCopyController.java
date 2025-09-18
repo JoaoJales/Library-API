@@ -29,7 +29,7 @@ public class BookCopyController {
     public ResponseEntity<GetBookCopyDTO> postBooks (@RequestBody @Valid BookCopyRegisterDTO data, UriComponentsBuilder uriBuilder) {
         BookCopy bookCopy = bookCopyService.createBookCopy(data);
 
-        var uri = uriBuilder.path("bookCopies/{id}").buildAndExpand(bookCopy.getId()).toUri();
+        var uri = uriBuilder.path("/bookCopies/{id}").buildAndExpand(bookCopy.getId()).toUri();
 
         return ResponseEntity.created(uri).body(new GetBookCopyDTO(bookCopy));
     }

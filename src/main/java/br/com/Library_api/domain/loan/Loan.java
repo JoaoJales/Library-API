@@ -2,6 +2,7 @@ package br.com.Library_api.domain.loan;
 
 import br.com.Library_api.domain.bookCopy.BookCopy;
 import br.com.Library_api.domain.user.User;
+import br.com.Library_api.domain.user.UserType;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,7 +46,7 @@ public class Loan {
         this.bookCopy = bookCopy;
         this.user = user;
         this.loanDate = data.loanDate();
-        this.dueDate = data.dueDate();
+        this.dueDate = calcuteDueDate();
         this.returnDate = null;
         this.loanStatus = LoanStatus.ACTIVE;
         this.renewals = 0;
@@ -56,12 +57,17 @@ public class Loan {
         this.returnDate = LocalDate.now();
     }
 
-    public void lateLoan(){
-        this.loanStatus = LoanStatus.LATE;
-    }
 
     public void renewLoan(int extraDays){
         this.dueDate = this.getDueDate().plusDays(extraDays);
         this.renewals++;
+    }
+
+    private LocalDate calcuteDueDate(){
+        if (this.getUser().getUserType() == UserType.STUDENT){
+            return this.loanDate.plusDays(14);
+        }else {
+            return this.loanDate.plusDays(30);
+        }
     }
 }

@@ -68,7 +68,7 @@ public class UserController {
     public ResponseEntity alterPassword(@RequestBody @Valid PutPasswordDTO data){
         User user = userService.alterPassword(data);
 
-        return ResponseEntity.ok().body(new GetSummaryDataLoginDTO(user.getEmail(), data.newPassword()));
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}/loans")
@@ -88,7 +88,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/loans/late")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
     public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLateLoans (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {
         Page<GetLoanSummaryDTO> page = userService.getUserLateLoans(pageable,id);
 

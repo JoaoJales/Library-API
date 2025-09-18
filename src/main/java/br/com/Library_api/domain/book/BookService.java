@@ -35,7 +35,7 @@ public class BookService {
     @Transactional
     public Book createBook(BookRegisterDTO data) {
         if (bookRepository.existsByIsbn(data.isbn())){
-            throw new IllegalArgumentException("Book with ISBN already registered");
+            throw new ResponseStatusException(HttpStatus.CONFLICT , "Book with ISBN already registered");
         }
 
         Author author = authorRepository.findById(data.authorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author Not Found"));

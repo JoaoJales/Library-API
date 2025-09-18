@@ -32,7 +32,7 @@ public class BookCopyService {
     @Transactional
     public BookCopy createBookCopy(@Valid BookCopyRegisterDTO data) {
         if (bookCopyRepository.existsByInventoryCode(data.inventoryCode())){
-            throw new IllegalArgumentException("The inventory code you entered already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The inventory code you entered already exists");
         }
 
         Optional<Book> book = bookRepository.findByIdAndActiveTrue(data.bookId());
@@ -41,8 +41,6 @@ public class BookCopyService {
         }
 
         BookCopy bookCopy = new BookCopy(data, book.get());
-
-         // não é precido salvar o book separadamente ou fazer book.get().getCopies().add(bookCopy);.
 
         bookCopyRepository.save(bookCopy);
         return bookCopy;
@@ -74,7 +72,7 @@ public class BookCopyService {
         long activeLoans = loanRepository.countActiveLoansByBookCopy(bookCopy.getId());
 
         if (activeLoans > 0){
-            throw new IllegalStateException("The user cannot be deactivated while having active loans.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user cannot be deactivated while having active loans.");
         }
 
         bookCopy.deleteBookCopy();

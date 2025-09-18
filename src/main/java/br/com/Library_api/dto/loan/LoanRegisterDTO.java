@@ -16,10 +16,6 @@ public record LoanRegisterDTO(
 
         @NotNull
         @PastOrPresent
-        LocalDate loanDate,
-
-        @NotNull
-        @Future
-        LocalDate dueDate
+        LocalDate loanDate
 ) {
 }

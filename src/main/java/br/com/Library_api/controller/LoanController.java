@@ -53,20 +53,12 @@ public class LoanController {
     @PatchMapping("{id}/return")
 //    @PreAuthorize("hasRole('ADMIN')") ---> real business rule
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")  // -->  test rule
-    //verificar se o loan pertence ao usuário logado
     public ResponseEntity<GetLoanDTO> returnLoan(@PathVariable Long id){
         GetLoanDTO dto = loanService.returnLoan(id);
 
         return ResponseEntity.ok().body(dto);
     }
 
-    @PatchMapping("{id}/late")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GetLoanDTO> lateLoan(@PathVariable Long id){
-        GetLoanDTO dto = loanService.setlateLoan(id);
-
-        return ResponseEntity.ok().body(dto);
-    }
 
     @PatchMapping("/{id}/renew") //Caso adiciona a reserva de livros -- verificar se alguem já reservou o livro antes de possibilitar o renew
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")

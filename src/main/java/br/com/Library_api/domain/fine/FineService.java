@@ -1,12 +1,15 @@
 package br.com.Library_api.domain.fine;
 
 import br.com.Library_api.domain.loan.Loan;
+import br.com.Library_api.domain.loan.LoanStatus;
 import br.com.Library_api.dto.fine.GetFineDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,6 +26,10 @@ public class FineService {
 
     @Transactional
     public Fine createFine (Loan loan) {
+        if (fineRepository.existsByLoanId(loan.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Loan already has an associated fine");
+        }
+
         Fine fine = new Fine(loan, calculateFine(loan));
         fineRepository.save(fine);
 
