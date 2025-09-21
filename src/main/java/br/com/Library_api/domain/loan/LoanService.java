@@ -3,8 +3,11 @@ package br.com.Library_api.domain.loan;
 import br.com.Library_api.domain.bookCopy.BookCopy;
 import br.com.Library_api.domain.bookCopy.BookCopyRepository;
 import br.com.Library_api.domain.fine.FineService;
-import br.com.Library_api.domain.loan.validations.createLoan.ValidatorCreateLoanService;
+import br.com.Library_api.domain.libraryPolicy.LibraryPolicyService;
+import br.com.Library_api.domain.loan.validations.createLoan.ValidatorCreateLoan;
 import br.com.Library_api.domain.loan.validations.renewLoan.ValidatorRenewLoan;
+import br.com.Library_api.domain.reservation.Reservation;
+import br.com.Library_api.domain.reservation.ReservationService;
 import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserRepository;
 import br.com.Library_api.domain.user.UserType;
@@ -12,12 +15,15 @@ import br.com.Library_api.dto.loan.GetLoanDTO;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import br.com.Library_api.infra.security.SecurityService;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,14 +33,19 @@ public class LoanService {
     private final UserRepository userRepository;
     private final BookCopyRepository bookCopyRepository;
     private final FineService fineService;
-    private final List<ValidatorCreateLoanService> validatorsCreateLoan;
+    private final List<ValidatorCreateLoan> validatorsCreateLoan;
     private final List<ValidatorRenewLoan> validatorsRenewLoan;
     private final SecurityService securityService;
+    private final ReservationService reservationService;
+    private final LibraryPolicyService libraryPolicyService;
 
     public LoanService (LoanRepository loanRepository, UserRepository userRepository,
                         BookCopyRepository bookCopyRepository, FineService fineService,
-                        List<ValidatorCreateLoanService> validatorsCreateLoan, List<ValidatorRenewLoan> validatorsRenewLoan,
-                        SecurityService securityService){
+                        List<ValidatorCreateLoan> validatorsCreateLoan, List<ValidatorRenewLoan> validatorsRenewLoan,
+                        SecurityService securityService, @Lazy final ReservationService reservationService,
+                        LibraryPolicyService libraryPolicyService){
+
+
         this.loanRepository = loanRepository;
         this.userRepository = userRepository;
         this.bookCopyRepository = bookCopyRepository;
@@ -42,6 +53,8 @@ public class LoanService {
         this.validatorsCreateLoan = validatorsCreateLoan;
         this.validatorsRenewLoan = validatorsRenewLoan;
         this.securityService = securityService;
+        this.reservationService = reservationService;
+        this.libraryPolicyService = libraryPolicyService;
     }
 
     @Transactional
@@ -53,7 +66,7 @@ public class LoanService {
 
         validatorsCreateLoan.forEach(v -> v.validate(data));
 
-        Loan loan = new Loan(data, user ,bookCopy);
+        Loan loan = new Loan(data, user ,bookCopy, calculatedueDate(user.getUserType(), LocalDateTime.now()));
         bookCopy.bookCopyNotAvailable();
         bookCopyRepository.save(bookCopy);
 
@@ -61,6 +74,22 @@ public class LoanService {
 
         return loan;
     }
+
+    @Transactional
+    public Loan createLoan(Reservation reservation, BookCopy bookCopy) {
+        LoanRegisterDTO data = new LoanRegisterDTO(reservation.getUser().getId(), bookCopy.getInventoryCode());
+        validatorsCreateLoan.forEach(v -> v.validate(data));
+        bookCopy.bookCopyNotAvailable();
+
+        Loan loan = new Loan(data, reservation.getUser(), bookCopy, calculatedueDate(reservation.getUser().getUserType(), LocalDateTime.now()));
+
+        bookCopyRepository.save(bookCopy);
+
+        loanRepository.save(loan);
+
+        return loan;
+    }
+
 
     public Page<GetLoanDTO> getLoans(Pageable pageable) {
         return loanRepository.findAllByEntitiesActives(pageable).map(GetLoanDTO::new);
@@ -77,10 +106,10 @@ public class LoanService {
     @Transactional
     public GetLoanDTO returnLoan (Long id){
         Loan loan = findLoan(id);
+
         if (loan.getLoanStatus() == LoanStatus.RETURNED){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Loan already returned");
         }
-        verifyLoanBelongsUserLogged(loan);
 
         loan.returnLoan();
         BookCopy bookCopy = loan.getBookCopy();
@@ -92,6 +121,9 @@ public class LoanService {
         }
 
         loanRepository.save(loan);
+
+        reservationService.processReservations(bookCopy.getBook());
+
         return new GetLoanDTO(loan);
     }
 
@@ -102,15 +134,7 @@ public class LoanService {
         verifyLoanBelongsUserLogged(loan);
         validatorsRenewLoan.forEach(l -> l.validate(loan));
 
-        //Calcula os dias extras de acordo com o user Type
-        int extraDays;
-        if (loan.getUser().getUserType() == UserType.STUDENT){
-            extraDays = 14;
-        }else {
-            extraDays = 30;
-        }
-
-        loan.renewLoan(extraDays);
+        loan.renewLoan(calculatedueDate(loan.getUser().getUserType(), loan.getDueDate().atTime(0,0,0)));
         loanRepository.save(loan);
         return new GetLoanDTO(loan);
     }
@@ -138,6 +162,14 @@ public class LoanService {
 
         if (!loan.getUser().getId().equals(userLoggedId)) {
             throw new IllegalArgumentException("Access denied. It is not possible to access loans from other users");
+        }
+    }
+
+    private LocalDate calculatedueDate(UserType userType, LocalDateTime date) {
+        if (userType == UserType.STUDENT){
+            return libraryPolicyService.nextOpeningTime(date.plusDays(14)).toLocalDate();
+        }else {
+            return libraryPolicyService.nextOpeningTime(date.plusDays(30)).toLocalDate();
         }
     }
 

@@ -5,5 +5,5 @@ import org.springframework.data.domain.Page;
 
 public record LoansResponseDTO(LoansDataSummaryDTO summary, Page<GetLoanDTO> content) {
 
-    public record LoansDataSummaryDTO(Long totalLoansByBook){}
+    public record LoansDataSummaryDTO(Long totalLoans){}
 }

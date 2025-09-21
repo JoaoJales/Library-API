@@ -1,6 +1,7 @@
 package br.com.Library_api.domain.loan;
 
 import br.com.Library_api.domain.bookCopy.BookCopy;
+import br.com.Library_api.domain.reservation.Reservation;
 import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserType;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
@@ -42,11 +43,11 @@ public class Loan {
 
     private int renewals;
 
-    public Loan (LoanRegisterDTO data, User user, BookCopy bookCopy){
+    public Loan (LoanRegisterDTO data, User user, BookCopy bookCopy, LocalDate dueDate){
         this.bookCopy = bookCopy;
         this.user = user;
-        this.loanDate = data.loanDate();
-        this.dueDate = calcuteDueDate();
+        this.loanDate = LocalDate.now();
+        this.dueDate = dueDate;
         this.returnDate = null;
         this.loanStatus = LoanStatus.ACTIVE;
         this.renewals = 0;
@@ -58,16 +59,8 @@ public class Loan {
     }
 
 
-    public void renewLoan(int extraDays){
-        this.dueDate = this.getDueDate().plusDays(extraDays);
+    public void renewLoan(LocalDate newDueDate){
+        this.dueDate = newDueDate;
         this.renewals++;
-    }
-
-    private LocalDate calcuteDueDate(){
-        if (this.getUser().getUserType() == UserType.STUDENT){
-            return this.loanDate.plusDays(14);
-        }else {
-            return this.loanDate.plusDays(30);
-        }
     }
 }

@@ -6,9 +6,13 @@ import br.com.Library_api.domain.bookCopy.BookCopy;
 import br.com.Library_api.domain.bookCopy.BookCopyRepository;
 import br.com.Library_api.domain.loan.Loan;
 import br.com.Library_api.domain.loan.LoanRepository;
+import br.com.Library_api.domain.reservation.Reservation;
+import br.com.Library_api.domain.reservation.ReservationRepository;
+import br.com.Library_api.domain.reservation.ReservationStatus;
 import br.com.Library_api.dto.book.*;
 import br.com.Library_api.dto.bookCopy.GetBookCopyDTO;
 import br.com.Library_api.dto.loan.GetLoanDTO;
+import br.com.Library_api.dto.reservation.GetReservationSummaryDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,12 +28,16 @@ public class BookService {
     private final AuthorRepository authorRepository;
     private final BookCopyRepository bookCopyRepository;
     private final LoanRepository loanRepository;
+    private final ReservationRepository reservationRepository;
 
-    public BookService (BookRepository bookRepository, AuthorRepository authorRepository, BookCopyRepository bookCopyRepository, LoanRepository loanRepository) {
+    public BookService (BookRepository bookRepository, AuthorRepository authorRepository,
+                        BookCopyRepository bookCopyRepository, LoanRepository loanRepository,
+                        ReservationRepository reservationRepository) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.bookCopyRepository = bookCopyRepository;
         this.loanRepository = loanRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
@@ -71,7 +79,7 @@ public class BookService {
     public void deleteBook(Long id) {
         Book book = findBook(id);
 
-        long bookCopiesActives = bookCopyRepository.countActiveBookCopiesByBook(book.getId());
+        long bookCopiesActives = bookCopyRepository.countAvailableBookCopiesByBook(book.getId());
 
         if (bookCopiesActives > 0){
             throw new IllegalStateException("The book cannot be deactivated while it has active copies.");
@@ -110,6 +118,19 @@ public class BookService {
         Long total = loans.getTotalElements();
 
         return new LoansResponseDTO(new LoansResponseDTO.LoansDataSummaryDTO(total), loans.map(GetLoanDTO::new));
+    }
+
+    public ReservationsResponseDTO getReservationsActivesOrFulfilledByBook (Pageable pageable, Long id) {
+        Page<Reservation> reservations =  reservationRepository.findReservationsActivesOrFulfilledByBook(pageable, id);
+
+        Long total = reservations.getTotalElements();
+        Long actives = reservations.stream().filter(r -> r.getReservationStatus().equals(ReservationStatus.ACTIVE)).count();
+
+        return new ReservationsResponseDTO(new ReservationsResponseDTO.ReservationDataSummaryDTO(total, actives), reservations.map(GetReservationSummaryDTO::new));
+    }
+
+    public Page<GetReservationSummaryDTO> getReservationsHistoryByBook (Pageable pageable, Long id) {
+        return reservationRepository.findReservationsHistoryByBook(pageable, id).map(GetReservationSummaryDTO::new);
     }
 }
 

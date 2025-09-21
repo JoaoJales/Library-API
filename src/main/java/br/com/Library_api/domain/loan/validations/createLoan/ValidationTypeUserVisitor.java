@@ -4,12 +4,15 @@ import br.com.Library_api.domain.user.UserRepository;
 import br.com.Library_api.domain.user.UserType;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
-public class ValidationTypeUserVisitor implements ValidatorCreateLoanService{
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class ValidationTypeUserVisitor implements ValidatorCreateLoan {
     @Autowired
     private UserRepository userRepository;
 

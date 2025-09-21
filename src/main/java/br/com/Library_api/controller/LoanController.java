@@ -43,7 +43,7 @@ public class LoanController {
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')") //verificar se o loan pertence ao usuário logado
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<GetLoanDTO> getDetailingLoan (@PathVariable Long id) {
         GetLoanDTO dto = loanService.getDetalingLoan(id);
 

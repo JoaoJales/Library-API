@@ -5,10 +5,12 @@ import br.com.Library_api.domain.user.UserRepository;
 import br.com.Library_api.domain.user.UserType;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidationMaxActiveLoansByUser implements ValidatorCreateLoanService{
+@Order(4)
+public class ValidationMaxActiveLoansByUser implements ValidatorCreateLoan {
     @Autowired
     private LoanRepository loanRepository;
 

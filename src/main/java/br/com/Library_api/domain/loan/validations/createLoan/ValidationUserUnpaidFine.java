@@ -3,10 +3,12 @@ package br.com.Library_api.domain.loan.validations.createLoan;
 import br.com.Library_api.domain.fine.FineRepository;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidationUserUnpaidFine implements ValidatorCreateLoanService{
+@Order(3)
+public class ValidationUserUnpaidFine implements ValidatorCreateLoan {
     @Autowired
     private FineRepository fineRepository;
 

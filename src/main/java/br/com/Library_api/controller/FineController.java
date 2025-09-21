@@ -38,7 +38,7 @@ public class FineController {
 
     @PatchMapping("/{id}/paid")
 //    @PreAuthorize("hasRole('ADMIN')") --> real business rule
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')") //test rule
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')") //-->test rule
     public ResponseEntity<GetFineDTO> finePaid (@PathVariable Long id){
         GetFineDTO dto = fineService.finePaid(id);
 

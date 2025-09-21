@@ -1,5 +1,6 @@
 package br.com.Library_api.domain.loan;
 
+import br.com.Library_api.domain.reservation.Reservation;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface LoanRepository extends JpaRepository<Loan, Long> {
@@ -22,7 +24,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     SELECT
         CASE
             WHEN COUNT(l) > 0 THEN true
-        ELSE false END
+            ELSE false
+        END
     FROM Loan l
     WHERE l.loanStatus = :loanStatus
      AND l.user.id = :id
@@ -91,4 +94,17 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
             WHERE l.dueDate <= :now AND l.loanStatus = 'ACTIVE'
             """)
     void updateLoansToLate(LocalDate now);
+
+    @Query("""
+            SELECT 
+                CASE WHEN COUNT(l) > 0 
+                THEN true 
+                ELSE false
+            END
+            FROM Loan l
+            WHERE (l.loanStatus = 'ACTIVE' OR l.loanStatus = 'LATE')
+            AND l.user.id = :userId
+            AND l.bookCopy.book.id = :bookId
+            """)
+    boolean existsByUserAndBook(Long userId, Long bookId);
 }

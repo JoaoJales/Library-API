@@ -4,10 +4,12 @@ import br.com.Library_api.domain.loan.LoanRepository;
 import br.com.Library_api.domain.loan.LoanStatus;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidationUserOverdueLoan implements ValidatorCreateLoanService{
+@Order(2)
+public class ValidationUserOverdueLoan implements ValidatorCreateLoan {
     @Autowired
     private LoanRepository loanRepository;
 

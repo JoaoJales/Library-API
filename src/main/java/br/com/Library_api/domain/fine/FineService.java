@@ -3,11 +3,13 @@ package br.com.Library_api.domain.fine;
 import br.com.Library_api.domain.loan.Loan;
 import br.com.Library_api.domain.loan.LoanStatus;
 import br.com.Library_api.dto.fine.GetFineDTO;
+import br.com.Library_api.infra.security.SecurityService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,9 +21,11 @@ import java.util.Optional;
 @Service
 public class FineService {
     private final FineRepository fineRepository;
+    private final SecurityService securityService;
 
-    public FineService (FineRepository fineRepository) {
+    public FineService (FineRepository fineRepository, SecurityService securityService) {
         this.fineRepository = fineRepository;
+        this.securityService = securityService;
     }
 
     @Transactional
@@ -49,6 +53,11 @@ public class FineService {
     @Transactional
     public GetFineDTO finePaid(Long id) {
         Fine fine = findFine(id);
+        long userLoggedId = securityService.getLoggedUserId();
+
+        if (fine.getLoan().getUser().getId() != userLoggedId) {
+            throw new AccessDeniedException("Acess Denied.");
+        }
 
         fine.finePaid();
         fineRepository.save(fine);

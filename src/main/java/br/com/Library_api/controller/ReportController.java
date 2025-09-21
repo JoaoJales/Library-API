@@ -1,4 +1,4 @@
-package br.com.Library_api.controller;
+package br.com.Library_api.controller.report;
 
 import br.com.Library_api.domain.report.ReportService;
 import br.com.Library_api.dto.report.*;

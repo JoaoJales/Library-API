@@ -4,6 +4,7 @@ import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserService;
 import br.com.Library_api.dto.fine.GetFineDTO;
 import br.com.Library_api.dto.loan.GetLoanSummaryDTO;
+import br.com.Library_api.dto.reservation.GetReservationSummaryDTO;
 import br.com.Library_api.dto.user.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -40,7 +41,7 @@ public class UserController {
         return ResponseEntity.ok().body(new GetDetailingUserDTO(user));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<GetUsersDTO>> getUsers (@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         Page<GetUsersDTO> page = userService.getUsers(pageable);
@@ -48,18 +49,16 @@ public class UserController {
         return ResponseEntity.ok(page);
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<GetDetailingUserDTO> getDetailingUser(@PathVariable Long id){
-        GetDetailingUserDTO detailingUser = userService.getDetailingUser(id);
+    @GetMapping
+    public ResponseEntity<GetDetailingUserDTO> getDetailingUser(){
+        GetDetailingUserDTO detailingUser = userService.getDetailingUser();
 
         return ResponseEntity.ok(detailingUser);
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity deleteUser(@PathVariable Long id){
-        userService.deleteUser(id);
+    @DeleteMapping
+    public ResponseEntity deleteUser(){
+        userService.deleteUser();
 
         return ResponseEntity.noContent().build();
     }
@@ -71,42 +70,58 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}/loans")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
-    public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLoanHistory (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {
-        Page<GetLoanSummaryDTO> page = userService.getUserLoanHistory(pageable,id);
+    @GetMapping("/loans")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLoanHistory (@PageableDefault(size = 10) Pageable pageable) {
+        Page<GetLoanSummaryDTO> page = userService.getUserLoanHistory(pageable);
 
         return ResponseEntity.ok().body(page);
     }
 
-    @GetMapping("/{id}/loans/active")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
-    public ResponseEntity<Page<GetLoanSummaryDTO>> getUserActiveLoans (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {
-        Page<GetLoanSummaryDTO> page = userService.getUserActiveLoans(pageable,id);
+    @GetMapping("/loans/active")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<Page<GetLoanSummaryDTO>> getUserActiveLoans (@PageableDefault(size = 10) Pageable pageable) {
+        Page<GetLoanSummaryDTO> page = userService.getUserActiveLoans(pageable);
 
         return ResponseEntity.ok().body(page);
     }
 
-    @GetMapping("/{id}/loans/late")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
-    public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLateLoans (@PageableDefault(size = 10) Pageable pageable ,@PathVariable Long id) {
-        Page<GetLoanSummaryDTO> page = userService.getUserLateLoans(pageable,id);
+    @GetMapping("/loans/late")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<Page<GetLoanSummaryDTO>> getUserLateLoans (@PageableDefault(size = 10) Pageable pageable) {
+        Page<GetLoanSummaryDTO> page = userService.getUserLateLoans(pageable);
 
         return ResponseEntity.ok().body(page);
     }
 
-    @GetMapping("/{id}/fines/unpaid")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
-    public ResponseEntity<Page<GetFineDTO>> getFinesUnpaid (@PageableDefault(size = 10) Pageable pageable, @PathVariable Long id) {
-        Page<GetFineDTO> page = userService.getFinesUnpaid(pageable, id);
+    @GetMapping("/fines/unpaid")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<Page<GetFineDTO>> getFinesUnpaid (@PageableDefault(size = 10) Pageable pageable) {
+        Page<GetFineDTO> page = userService.getFinesUnpaid(pageable);
 
         return ResponseEntity.ok().body(page);
     }
 
-    @GetMapping("/{id}/fines/paid")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#id == authentication.principal.id or hasRole('ADMIN'))")
-    public ResponseEntity<Page<GetFineDTO>> getFinesPaid (@PageableDefault(size = 10) Pageable pageable, @PathVariable Long id) {
-        Page<GetFineDTO> page = userService.getFinesPaid(pageable, id);
+    @GetMapping("/fines/paid")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<Page<GetFineDTO>> getFinesPaid (@PageableDefault(size = 10) Pageable pageable) {
+        Page<GetFineDTO> page = userService.getFinesPaid(pageable);
+
+        return ResponseEntity.ok().body(page);
+    }
+
+    @GetMapping("/reservations")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<Page<GetReservationSummaryDTO>> getReservationsByUser(@PageableDefault(size = 10) Pageable pageable){
+        Page<GetReservationSummaryDTO> page = userService.getReservationsByUser(pageable);
+
+        return ResponseEntity.ok().body(page);
+    }
+
+    @GetMapping("/reservations/actives")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
+    public ResponseEntity<Page<GetReservationSummaryDTO>> getReservationsActivesOrFulfilledByUser(@PageableDefault(size = 10) Pageable pageable){
+        Page<GetReservationSummaryDTO> page = userService.getReservationsActivesOrFulfilled(pageable);
 
         return ResponseEntity.ok().body(page);
     }

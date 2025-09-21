@@ -3,7 +3,7 @@ package br.com.Library_api.controller;
 import br.com.Library_api.domain.book.Book;
 import br.com.Library_api.domain.book.BookService;
 import br.com.Library_api.dto.book.*;
-import br.com.Library_api.dto.bookCopy.GetBookCopyDTO;
+import br.com.Library_api.dto.reservation.GetReservationSummaryDTO;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,12 +65,28 @@ public class BookController {
         return ResponseEntity.ok().body(dto);
     }
 
-    @GetMapping("/{id}/loans")
+    @GetMapping("/{id}/loans/history")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity getLoansByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
+    public ResponseEntity<LoansResponseDTO> getLoansByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
         var dto = bookService.getLoansByBook(pageable, id);
 
         return ResponseEntity.ok().body(dto);
+    }
+
+    @GetMapping("/{id}/reservations/actives")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ReservationsResponseDTO> getReservationsActivesOrFulfilledByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
+        var dto = bookService.getReservationsActivesOrFulfilledByBook(pageable, id);
+
+        return ResponseEntity.ok().body(dto);
+    }
+
+    @GetMapping("/{id}/reservations/history")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<GetReservationSummaryDTO>> getReservationsHistoryByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
+        var page = bookService.getReservationsHistoryByBook(pageable, id);
+
+        return ResponseEntity.ok().body(page);
     }
 
     @DeleteMapping("/{id}")

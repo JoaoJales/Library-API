@@ -23,7 +23,11 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, Long> {
     @Query("""
     SELECT COUNT(bc) FROM BookCopy bc
     WHERE bc.book.id = :bookId
-      AND bc.active = true
+      AND bc.available = true
     """)
-    long countActiveBookCopiesByBook(Long bookId);
+    long countAvailableBookCopiesByBook(Long bookId);
+
+    BookCopy findFirstByBookIdAndAvailableTrueOrderByIdAsc(Long id);
+
+    boolean existsByBookIdAndAvailableAndActiveTrue(Long id, boolean b);
 }
