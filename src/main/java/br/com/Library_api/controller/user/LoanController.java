@@ -1,4 +1,4 @@
-package br.com.Library_api.controller;
+package br.com.Library_api.controller.user;
 
 import br.com.Library_api.domain.loan.Loan;
 import br.com.Library_api.domain.loan.LoanService;
@@ -24,7 +24,7 @@ public class LoanController {
     }
 
     @PostMapping
-//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule
+//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule (admin controller)
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN') and (#data.userId == authentication.principal.id or hasRole('ADMIN'))") // --> test rule
     public ResponseEntity<GetLoanDTO> postLoan(@RequestBody @Valid LoanRegisterDTO data, UriComponentsBuilder uriBuilder) {
         Loan loan = loanService.createLoan(data);
@@ -51,7 +51,7 @@ public class LoanController {
     }
 
     @PatchMapping("{id}/return")
-//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule
+//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule (admin controller)
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")  // -->  test rule
     public ResponseEntity<GetLoanDTO> returnLoan(@PathVariable Long id){
         GetLoanDTO dto = loanService.returnLoan(id);
@@ -60,7 +60,7 @@ public class LoanController {
     }
 
 
-    @PatchMapping("/{id}/renew") //Caso adiciona a reserva de livros -- verificar se alguem já reservou o livro antes de possibilitar o renew
+    @PatchMapping("/{id}/renew")
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<GetLoanDTO> renewLoan(@PathVariable Long id) {
         GetLoanDTO dto = loanService.renewLoan(id);

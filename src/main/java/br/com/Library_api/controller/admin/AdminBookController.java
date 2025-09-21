@@ -1,4 +1,4 @@
-package br.com.Library_api.controller;
+package br.com.Library_api.controller.admin;
 
 import br.com.Library_api.domain.book.Book;
 import br.com.Library_api.domain.book.BookService;
@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/books")
-public class BookController {
+@RequestMapping("/admin/books")
+public class AdminBookController {
     private final BookService bookService;
 
-    public  BookController (BookService bookService){
+    public AdminBookController(BookService bookService){
         this.bookService = bookService;
     }
 
@@ -33,36 +33,12 @@ public class BookController {
         return ResponseEntity.created(uri).body(new GetDetailingBookDTO(book));
     }
 
-    @GetMapping
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
-    public ResponseEntity<Page<GetBooksDTO>> getBooks (@PageableDefault(size = 10, sort = "id") Pageable pageable){
-       Page<GetBooksDTO> page = bookService.getBooks(pageable);
-
-       return ResponseEntity.ok().body(page);
-    }
-
-    @GetMapping("{id}")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
-    public ResponseEntity<GetDetailingBookDTO> getDetailingBook (@PathVariable Long id){
-        GetDetailingBookDTO detailingBook = bookService.getDetailingBook(id);
-
-        return ResponseEntity.ok().body(detailingBook);
-    }
-
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingBookDTO> putBook(@RequestBody @Valid PutBookDTO data){
         var bookDto = bookService.putBook(data);
 
         return ResponseEntity.ok().body(bookDto);
-    }
-
-    @GetMapping("/{id}/copies")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
-    public ResponseEntity<BookCopiesResponseDTO> getBookCopies(@PageableDefault(size = 10, sort = "id") Pageable pageable, @PathVariable Long id){
-        BookCopiesResponseDTO dto = bookService.getBookCopiesByBook(pageable, id);
-
-        return ResponseEntity.ok().body(dto);
     }
 
     @GetMapping("/{id}/loans/history")

@@ -1,4 +1,4 @@
-package br.com.Library_api.controller;
+package br.com.Library_api.controller.user;
 
 import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserService;
@@ -39,14 +39,6 @@ public class UserController {
         var user = userService.updateUser(data);
 
         return ResponseEntity.ok().body(new GetDetailingUserDTO(user));
-    }
-
-    @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<GetUsersDTO>> getUsers (@PageableDefault(size = 10, sort = "id") Pageable pageable) {
-        Page<GetUsersDTO> page = userService.getUsers(pageable);
-
-        return ResponseEntity.ok(page);
     }
 
     @GetMapping

@@ -1,4 +1,4 @@
-package br.com.Library_api.controller;
+package br.com.Library_api.controller.user;
 
 import br.com.Library_api.domain.author.Author;
 import br.com.Library_api.domain.author.AuthorService;

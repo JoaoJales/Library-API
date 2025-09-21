@@ -1,15 +1,11 @@
-package br.com.Library_api.controller;
+package br.com.Library_api.controller.user;
 
 import br.com.Library_api.domain.reservation.Reservation;
 import br.com.Library_api.domain.reservation.ReservationService;
 import br.com.Library_api.dto.reservation.GetDetailingReservationDTO;
 import br.com.Library_api.dto.reservation.GetLoanFromReservation;
-import br.com.Library_api.dto.reservation.GetReservationSummaryDTO;
 import br.com.Library_api.dto.reservation.PostReservationDTO;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +31,7 @@ public class ReservationController {
     }
 
     @PatchMapping("/{reservationId}/pickup")
-//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule
+//    @PreAuthorize("hasRole('ADMIN')") ---> real business rule (admin controller)
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')") // --> test rule
     public ResponseEntity<GetLoanFromReservation> pickUpReservation(@PathVariable Long reservationId) {
         GetLoanFromReservation dto = reservationService.pickUpReservedBook(reservationId);
@@ -57,14 +53,6 @@ public class ReservationController {
         var dto = reservationService.getDetailingReservation(id);
 
         return ResponseEntity.ok(dto);
-    }
-
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<GetReservationSummaryDTO>> getReservations (@PageableDefault(size = 10)Pageable pageable){
-        var page = reservationService.getReservations(pageable);
-
-        return ResponseEntity.ok(page);
     }
 
 }
