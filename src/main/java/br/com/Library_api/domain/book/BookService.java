@@ -68,7 +68,7 @@ public class BookService {
 
     @Transactional
     public GetDetailingBookDTO putBook(PutBookDTO data){
-        var book = findBook(data.id());
+        var book = findBook(data.bookId());
 
         book.updateInfoBook(data);
         bookRepository.save(book);

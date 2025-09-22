@@ -5,7 +5,7 @@ import br.com.Library_api.domain.loan.LoanStatus;
 
 import java.time.LocalDate;
 
-public record GetLoanSummaryDTO(Long id, String bookTitle, String inventoryCode ,
+public record GetLoanSummaryDTO(Long loanId, String bookTitle, String inventoryCode ,
                                 LocalDate loanDate, LocalDate dueDate, LocalDate returnDate, LoanStatus loanStatus, int renewals) {
 
 

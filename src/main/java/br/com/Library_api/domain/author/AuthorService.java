@@ -43,7 +43,7 @@ public class AuthorService {
     }
 
     public GetDetailingAuthorDTO putAuthor(PutAuthorDTO data) {
-        Author author = findAuthor(data.id());
+        Author author = findAuthor(data.authorId());
         author.updateInfoAuthor(data);
 
         authorRepository.save(author);

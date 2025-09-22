@@ -59,7 +59,7 @@ public class UserService {
             throw new IllegalArgumentException("email already registered");
         }
 
-        var user = findUser(data.id());
+        var user = findUser(data.userId());
         user.updateInfoUser(data);
         userRepository.save(user);
 

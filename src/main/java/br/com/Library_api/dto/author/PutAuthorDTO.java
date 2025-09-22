@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 public record PutAuthorDTO(
         @NotNull
-        Long id,
+        Long authorId,
         String name,
         String nationality,
         @Past

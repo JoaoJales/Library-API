@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record PutBookDTO(
         @NotNull
-        Long id,
+        Long bookId,
         String title,
         Integer publicationYear,
         String publisher,

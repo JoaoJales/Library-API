@@ -70,7 +70,7 @@ public class UserController {
         return ResponseEntity.ok().body(page);
     }
 
-    @GetMapping("/loans/active")
+    @GetMapping("/loans/actives")
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<Page<GetLoanSummaryDTO>> getUserActiveLoans (@PageableDefault(size = 10) Pageable pageable) {
         Page<GetLoanSummaryDTO> page = userService.getUserActiveLoans(pageable);

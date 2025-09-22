@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record PutBookCopyDTO(
         @NotNull
-        Long id,
+        Long copyId,
 
         @NotBlank
         String inventoryCode

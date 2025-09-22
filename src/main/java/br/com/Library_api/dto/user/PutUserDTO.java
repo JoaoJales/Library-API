@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record PutUserDTO(
         @NotNull
-        Long id,
+        Long userId,
 
         String name,
 

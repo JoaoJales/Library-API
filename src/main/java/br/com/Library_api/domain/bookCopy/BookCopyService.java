@@ -58,7 +58,7 @@ public class BookCopyService {
 
     @Transactional
     public GetBookCopyDTO putBookCopy(@Valid PutBookCopyDTO data) {
-        BookCopy bookCopy = findBookCopy(data.id());
+        BookCopy bookCopy = findBookCopy(data.copyId());
 
         bookCopy.updateBookCopy(data);
         bookCopyRepository.save(bookCopy);
