@@ -100,7 +100,73 @@ Além disso, implementação de consultas SQL personalizadas:
 > OBS: Alguns endpoints restritos a administradores (Regras de Negócio real) foram liberados a outros usuários para testes. Para mais detalhes veja as regras liberadas em [`RULE.md`](./RULE.md)
 
 ---
+## 📄 Exemplos de JSON
+### Empréstimo
+##### request:
+```json
+{
+  "userId":"12",
+  "bookCopyInventoryCode":"WS-H-1603-003"
+}
+```
+##### response:
+```json
+{
+  "loanId": 91,
+  "userName": "João Ricardo",
+  "titleBook": "Hamlet",
+  "copy": "WS-H-1603-003",
+  "loanDate": "2025-09-22",
+  "dueDate": "2025-10-22",
+  "returnDate": null,
+  "status": "ACTIVE",
+  "renewals": 0
+}
+```
 
+### Reserva
+##### request:
+```json
+{
+  "bookId":"12"
+}
+```
+##### response:
+```json
+{
+  "reservationId": 11,
+  "userId": 12,
+  "name": "João Ricardo",
+  "bookId": 12,
+  "title": "Crime e Castigo",
+  "reservationDate": "2025-09-22T16:39:38.9268386",
+  "expiredDate": null,
+  "status": "ACTIVE"
+}
+```
+
+### Multa
+```json
+{
+  "fineId": 15,
+  "username": "Beatriz Martins",
+  "amount": 5.00,
+  "issuedDate": "2025-09-20",
+  "paid": true,
+  "loan": {
+    "loanId": 81,
+    "bookTitle": "A Hora da Estrela",
+    "inventoryCode": "CL-HE-1977-002",
+    "loanDate": "2025-09-20",
+    "dueDate": "2025-09-15",
+    "returnDate": "2025-09-20",
+    "loanStatus": "RETURNED",
+    "renewals": 0
+  }
+}
+```
+
+--- 
 ### ⚙️ Tecnologias utilizadas
 
 * **Java 21**
