@@ -6,6 +6,9 @@ import br.com.Library_api.dto.author.AuthorRegisterDTO;
 import br.com.Library_api.dto.author.GetAuthorSummaryDTO;
 import br.com.Library_api.dto.author.GetDetailingAuthorDTO;
 import br.com.Library_api.dto.author.PutAuthorDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("/authors")
+//@RequestMapping("/authors")
+//@Tag(name = "8 - Authors")
+@SecurityRequirement(name = "bearer-key")
 public class AuthorController {
     private final AuthorService authorService;
 
@@ -24,7 +29,8 @@ public class AuthorController {
         this.authorService = authorService;
     }
 
-    @PostMapping
+    @Operation(summary = "Registrar Autor", tags = {"9 - Admin"})
+    @PostMapping("/admin/authors")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingAuthorDTO> postAuthor(@RequestBody @Valid AuthorRegisterDTO data, UriComponentsBuilder uriBuilder){
         Author author = authorService.createAuthor(data);
@@ -34,15 +40,17 @@ public class AuthorController {
         return ResponseEntity.created(uri).body(new GetDetailingAuthorDTO(author));
     }
 
-    @GetMapping("{id}")
+    @Operation(summary = "Consultar detalhes de um autor", tags = {"8 - Authors"})
+    @GetMapping("/authors/{authorId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
-    public ResponseEntity<GetDetailingAuthorDTO> getAuthor(@PathVariable Long id){
-        GetDetailingAuthorDTO dto = authorService.getDetailingAuthor(id);
+    public ResponseEntity<GetDetailingAuthorDTO> getAuthor(@PathVariable Long authorId){
+        GetDetailingAuthorDTO dto = authorService.getDetailingAuthor(authorId);
 
         return ResponseEntity.ok().body(dto);
     }
 
-    @GetMapping
+    @Operation(summary = "Consultar todos os Autores", tags = {"8 - Authors"})
+    @GetMapping("/authors")
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'VISITOR', 'ADMIN')")
     public ResponseEntity<Page<GetAuthorSummaryDTO>> getAuthors(@PageableDefault(size = 10, sort = "id") Pageable pageable){
         Page<GetAuthorSummaryDTO> page = authorService.getAuthors(pageable);
@@ -50,7 +58,8 @@ public class AuthorController {
         return ResponseEntity.ok().body(page);
     }
 
-    @PutMapping
+    @Operation(summary = "Atualizar Autor", tags = {"9 - Admin"})
+    @PutMapping("/admin/authors")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingAuthorDTO> putAuthor(@RequestBody @Valid PutAuthorDTO data){
         GetDetailingAuthorDTO dto = authorService.putAuthor(data);

@@ -5,6 +5,8 @@ import br.com.Library_api.domain.bookCopy.BookCopyService;
 import br.com.Library_api.dto.bookCopy.BookCopyRegisterDTO;
 import br.com.Library_api.dto.bookCopy.GetBookCopyDTO;
 import br.com.Library_api.dto.bookCopy.PutBookCopyDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/admin/bookCopies")
+@SecurityRequirement(name = "bearer-key")
 public class AdminBookCopyController {
     private final BookCopyService bookCopyService;
 
@@ -20,6 +23,7 @@ public class AdminBookCopyController {
         this.bookCopyService = bookCopyService;
     }
 
+    @Operation(summary = "Registrar Cópia", tags = {"9 - Admin"})
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetBookCopyDTO> postBooks (@RequestBody @Valid BookCopyRegisterDTO data, UriComponentsBuilder uriBuilder) {
@@ -30,6 +34,7 @@ public class AdminBookCopyController {
         return ResponseEntity.created(uri).body(new GetBookCopyDTO(bookCopy));
     }
 
+    @Operation(summary = "Atualizar Cópia", tags = {"9 - Admin"})
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetBookCopyDTO> putBookCopy (@RequestBody @Valid PutBookCopyDTO data) {
@@ -38,10 +43,11 @@ public class AdminBookCopyController {
         return ResponseEntity.ok().body(getBookCopyDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar Cópia (soft delete)", tags = {"9 - Admin"})
+    @DeleteMapping("/{bookCopyId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity deleteBookCopy (@PathVariable Long id) {
-        bookCopyService.deleteBookCopy(id);
+    public ResponseEntity deleteBookCopy (@PathVariable Long bookCopyId) {
+        bookCopyService.deleteBookCopy(bookCopyId);
 
         return ResponseEntity.noContent().build();
     }

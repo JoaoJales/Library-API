@@ -4,6 +4,8 @@ import br.com.Library_api.domain.book.Book;
 import br.com.Library_api.domain.book.BookService;
 import br.com.Library_api.dto.book.*;
 import br.com.Library_api.dto.reservation.GetReservationSummaryDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/admin/books")
+@SecurityRequirement(name = "bearer-key")
 public class AdminBookController {
     private final BookService bookService;
 
@@ -23,6 +26,7 @@ public class AdminBookController {
         this.bookService = bookService;
     }
 
+    @Operation(summary = "Registrar Livro", tags = {"9 - Admin"})
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingBookDTO> postBook(@RequestBody @Valid BookRegisterDTO data, UriComponentsBuilder uriBuilder){
@@ -33,6 +37,7 @@ public class AdminBookController {
         return ResponseEntity.created(uri).body(new GetDetailingBookDTO(book));
     }
 
+    @Operation(summary = "Atualizar Livro", tags = {"9 - Admin"})
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GetDetailingBookDTO> putBook(@RequestBody @Valid PutBookDTO data){
@@ -41,34 +46,38 @@ public class AdminBookController {
         return ResponseEntity.ok().body(bookDto);
     }
 
-    @GetMapping("/{id}/loans/history")
+    @Operation(summary = "Consultar histórico de empréstimos de um livro", tags = {"9 - Admin"})
+    @GetMapping("/{bookId}/loans/history")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<LoansResponseDTO> getLoansByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
-        var dto = bookService.getLoansByBook(pageable, id);
+    public ResponseEntity<LoansResponseDTO> getLoansByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long bookId){
+        var dto = bookService.getLoansByBook(pageable, bookId);
 
         return ResponseEntity.ok().body(dto);
     }
 
-    @GetMapping("/{id}/reservations/actives")
+    @Operation(summary = "Consultar reservas ativas ou prontas de um livro", tags = {"9 - Admin"})
+    @GetMapping("/{bookId}/reservations/actives")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ReservationsResponseDTO> getReservationsActivesOrFulfilledByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
-        var dto = bookService.getReservationsActivesOrFulfilledByBook(pageable, id);
+    public ResponseEntity<ReservationsResponseDTO> getReservationsActivesOrFulfilledByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long bookId){
+        var dto = bookService.getReservationsActivesOrFulfilledByBook(pageable, bookId);
 
         return ResponseEntity.ok().body(dto);
     }
 
-    @GetMapping("/{id}/reservations/history")
+    @Operation(summary = "Consultar histórico de reservas de um livro", tags = {"9 - Admin"})
+    @GetMapping("/{bookId}/reservations/history")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<GetReservationSummaryDTO>> getReservationsHistoryByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id){
-        var page = bookService.getReservationsHistoryByBook(pageable, id);
+    public ResponseEntity<Page<GetReservationSummaryDTO>> getReservationsHistoryByBook (@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long bookId){
+        var page = bookService.getReservationsHistoryByBook(pageable, bookId);
 
         return ResponseEntity.ok().body(page);
     }
 
-    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar livro (soft delete)", tags = {"9 - Admin"})
+    @DeleteMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity deleteBook (@PathVariable Long id){
-        bookService.deleteBook(id);
+    public ResponseEntity deleteBook (@PathVariable Long bookId){
+        bookService.deleteBook(bookId);
 
         return ResponseEntity.noContent().build();
     }

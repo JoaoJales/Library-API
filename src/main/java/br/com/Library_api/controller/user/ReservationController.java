@@ -5,6 +5,9 @@ import br.com.Library_api.domain.reservation.ReservationService;
 import br.com.Library_api.dto.reservation.GetDetailingReservationDTO;
 import br.com.Library_api.dto.reservation.GetLoanFromReservation;
 import br.com.Library_api.dto.reservation.PostReservationDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +16,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/reservations")
+@Tag(name = "6 - Reservations")
+@SecurityRequirement(name = "bearer-key")
 public class ReservationController {
     private final ReservationService reservationService;
 
@@ -20,6 +25,7 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @Operation(summary = "Registrar Reserva")
     @PostMapping
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity<GetDetailingReservationDTO> postReservation(@RequestBody @Valid PostReservationDTO data, UriComponentsBuilder uriBuilder) {
@@ -30,6 +36,7 @@ public class ReservationController {
         return ResponseEntity.created(uri).body(new GetDetailingReservationDTO(reservation));
     }
 
+    @Operation(summary = "Confirmar entrega de livro de uma Reserva")
     @PatchMapping("/{reservationId}/pickup")
 //    @PreAuthorize("hasRole('ADMIN')") ---> real business rule (admin controller)
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')") // --> test rule
@@ -38,6 +45,7 @@ public class ReservationController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "Cancelar Reserva")
     @DeleteMapping("/{reservationId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
     public ResponseEntity calcelReservation(@PathVariable Long reservationId) {
@@ -47,10 +55,11 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("{id}")
+    @Operation(summary = "Consultar detalhes de uma Reserva")
+    @GetMapping("{reservationId}")
     @PreAuthorize("hasAnyRole('STUDENT', 'PROFESSOR', 'ADMIN')")
-    public ResponseEntity<GetDetailingReservationDTO> getDetailingReservation (@PathVariable Long id) {
-        var dto = reservationService.getDetailingReservation(id);
+    public ResponseEntity<GetDetailingReservationDTO> getDetailingReservation (@PathVariable Long reservationId) {
+        var dto = reservationService.getDetailingReservation(reservationId);
 
         return ResponseEntity.ok(dto);
     }

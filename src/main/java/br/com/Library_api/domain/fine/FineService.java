@@ -42,7 +42,17 @@ public class FineService {
 
     public GetFineDTO getFine(Long id) {
         Fine fine = findFine(id);
+        long userLoggedId = securityService.getLoggedUserId();
 
+        if (!fine.getLoan().getUser().getId().equals(userLoggedId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied. It is not possible to access fines from other users");
+        }
+
+        return new GetFineDTO(fine);
+    }
+
+    public GetFineDTO getFineAdmin(Long id) {
+        Fine fine = findFine(id);
         return new GetFineDTO(fine);
     }
 

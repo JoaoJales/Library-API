@@ -2,6 +2,7 @@ package br.com.Library_api.domain.loan;
 
 import br.com.Library_api.domain.bookCopy.BookCopy;
 import br.com.Library_api.domain.bookCopy.BookCopyRepository;
+import br.com.Library_api.domain.fine.Fine;
 import br.com.Library_api.domain.fine.FineService;
 import br.com.Library_api.domain.libraryPolicy.LibraryPolicyService;
 import br.com.Library_api.domain.loan.validations.createLoan.ValidatorCreateLoan;
@@ -11,6 +12,7 @@ import br.com.Library_api.domain.reservation.ReservationService;
 import br.com.Library_api.domain.user.User;
 import br.com.Library_api.domain.user.UserRepository;
 import br.com.Library_api.domain.user.UserType;
+import br.com.Library_api.dto.loan.GetLoanAndFine;
 import br.com.Library_api.dto.loan.GetLoanDTO;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import br.com.Library_api.infra.security.SecurityService;
@@ -104,7 +106,7 @@ public class LoanService {
     }
 
     @Transactional
-    public GetLoanDTO returnLoan (Long id){
+    public GetLoanAndFine returnLoan (Long id){
         Loan loan = findLoan(id);
 
         if (loan.getLoanStatus() == LoanStatus.RETURNED){
@@ -116,15 +118,16 @@ public class LoanService {
         bookCopy.bookCopyAvailable();
         bookCopyRepository.save(bookCopy);
 
+        Fine fine = null;
         if (loan.getReturnDate().isAfter(loan.getDueDate())){
-            fineService.createFine(loan);
+           fine = fineService.createFine(loan);
         }
 
         loanRepository.save(loan);
 
         reservationService.processReservations(bookCopy.getBook());
 
-        return new GetLoanDTO(loan);
+        return new GetLoanAndFine(loan, fine);
     }
 
 

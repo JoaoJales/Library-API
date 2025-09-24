@@ -4,6 +4,8 @@ import br.com.Library_api.domain.user.User;
 import br.com.Library_api.dto.user.userAuthorization.UserAuthorizationDTO;
 import br.com.Library_api.infra.security.DTOTokenJWT;
 import br.com.Library_api.infra.security.TokenService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("auth/")
+@Tag(name = "1 - Login", description = "Endpoint de Login")
 public class AuthorizationController {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
@@ -24,6 +27,7 @@ public class AuthorizationController {
         this.tokenService = tokenService;
     }
 
+    @Operation(summary = "Login de usuário")
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid UserAuthorizationDTO data){
         var authenticationToken = new UsernamePasswordAuthenticationToken(data.email(), data.password());

@@ -117,6 +117,9 @@ public class ReportRepositoryCustom {
         List<LateLoansRealTimeAdminDTO> resultList = query.getResultList();
         long total = em.createQuery("""
                         SELECT COUNT(l.id) FROM Loan l
+                        JOIN l.user u
+                        JOIN l.bookCopy bc
+                        JOIN bc.book b
                         WHERE l.returnDate IS NULL AND l.dueDate < CURRENT_DATE
                                 AND u.active = true
                                 AND bc.active = true
@@ -170,7 +173,12 @@ public class ReportRepositoryCustom {
         query.setMaxResults(pageable.getPageSize());
 
         List<TopUsersMostFinesDTO> list = query.getResultList();
-        long total = em.createQuery("SELECT COUNT(DISTINCT u.id) From fine f JOIN f.user u", Long.class)
+        long total = em.createQuery("""
+                        SELECT COUNT(DISTINCT u.id) From Fine f
+                        JOIN f.loan l
+                        JOIN l.user u
+                        WHERE u.active = true
+                        """, Long.class)
                 .getSingleResult();
 
         return new PageImpl<>(list, pageable, total);

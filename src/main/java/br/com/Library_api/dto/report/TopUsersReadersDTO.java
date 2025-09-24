@@ -1,4 +1,17 @@
 package br.com.Library_api.dto.report;
 
-public record TopUsersReadersDTO(Long userId, String name, String email, Long totalLoans) {
+import io.swagger.v3.oas.annotations.media.Schema;
+
+public record TopUsersReadersDTO(
+        @Schema(example = "9")
+        Long userId,
+
+        @Schema(example = "Beatriz Martins")
+        String name,
+
+        @Schema(example = "beatriz.martins@hotmail.com")
+        String email,
+
+        @Schema(example = "16")
+        Long totalLoans) {
 }

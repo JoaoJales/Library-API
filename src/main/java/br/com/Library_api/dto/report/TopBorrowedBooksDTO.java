@@ -1,6 +1,18 @@
 package br.com.Library_api.dto.report;
 
-import br.com.Library_api.domain.book.Book;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-public record TopBorrowedBooksDTO(Long bookId, String title, String authorName, Long loanCount) {
+public record TopBorrowedBooksDTO(
+        @Schema(example = "12")
+        Long bookId,
+
+        @Schema(example = "Crime e Castigo")
+        String title,
+
+        @Schema(example = "Fiódor Dostoiévski")
+        String authorName,
+
+        @Schema(example = "21")
+        Long loanCount
+) {
 }

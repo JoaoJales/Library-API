@@ -4,6 +4,8 @@ import br.com.Library_api.domain.loan.Loan;
 import br.com.Library_api.domain.loan.LoanService;
 import br.com.Library_api.dto.loan.GetLoanDTO;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/admin/loans")
+@SecurityRequirement(name = "bearer-key")
 public class AdminLoanController {
     private final LoanService loanService;
 
@@ -23,6 +26,7 @@ public class AdminLoanController {
     }
 
     //TODO: disabled for common user testing
+//    @Operation(summary = "Registrar um empréstimo", tags = {"9 - Admin"})
 //    @PostMapping
 //    @PreAuthorize("hasRole('ADMIN')")
 //    public ResponseEntity<GetLoanDTO> postLoan(@RequestBody @Valid LoanRegisterDTO data, UriComponentsBuilder uriBuilder) {
@@ -33,6 +37,7 @@ public class AdminLoanController {
 //        return ResponseEntity.created(uri).body(new GetLoanDTO(loan));
 //    }
 
+    @Operation(summary = "Consultar todas os empréstimos", tags = {"9 - Admin"})
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<GetLoanDTO>> getLoans (@PageableDefault(size = 10, sort = "id") Pageable pageable) {
@@ -42,10 +47,11 @@ public class AdminLoanController {
     }
 
     //TODO: disabled for common user testing
+//    @Operation(summary = "Confirmar retorno de empréstimo", tags = {"9 - Admin"})
 //    @PatchMapping("{id}/return")
 //    @PreAuthorize("hasRole('ADMIN')")
-//    public ResponseEntity<GetLoanDTO> returnLoan(@PathVariable Long id){
-//        GetLoanDTO dto = loanService.returnLoan(id);
+//    public ResponseEntity<GetLoanAndFine> returnLoan(@PathVariable Long id){
+//        GetLoanAndFine dto = loanService.returnLoan(id);
 //
 //        return ResponseEntity.ok().body(dto);
 //    }
