@@ -5,12 +5,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record UserAuthorizationDTO(
-        @Schema(example = "example@email.com")
+        @Schema(example = "admin@gmail.com")
         @NotBlank
         @Email
         String email,
 
-        @Schema(example = "senha123")
+        @Schema(example = "admin123")
         @NotBlank
         String password
 ) {
