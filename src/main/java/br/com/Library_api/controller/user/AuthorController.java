@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-//@RequestMapping("/authors")
-//@Tag(name = "8 - Authors")
 @SecurityRequirement(name = "bearer-key")
 public class AuthorController {
     private final AuthorService authorService;

@@ -23,7 +23,7 @@ public class AdminUserController {
     }
 
     @Operation(summary = "Consultar todos os usuários", tags = {"9 - Admin"})
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<Page<GetUsersDTO>> getUsers (@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         Page<GetUsersDTO> page = userService.getUsers(pageable);
 

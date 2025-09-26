@@ -4,7 +4,9 @@ import br.com.Library_api.domain.bookCopy.BookCopyRepository;
 import br.com.Library_api.dto.loan.LoanRegisterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 @Order(1)
@@ -18,7 +20,7 @@ public class ValidationBookNotAvailable implements ValidatorCreateLoan {
 
 
         if (!bookCopy.getAvailable()){
-            throw new IllegalStateException("This book copy is not available.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"This book copy is not available. Try to make a Reservation");
         }
     }
 }
