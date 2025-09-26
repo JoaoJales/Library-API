@@ -8,6 +8,25 @@ Além disso, implementação de consultas SQL personalizadas:
 -  **Consultas de administradores**: informações mais sensíveis das entidades como histórico de empréstimos de um livro e reservas ativas no sistema.
 -  **Relatórios administrativos**: relatórios para análises como livros mais emprestados, autores mais lidos e melhores leitores.
 
+---
+
+### 📚 Sumário
+
+1. [Principais Funcionalidades](#-principais-funcionalidades)
+2. [Regras de Negócio](#-regras-de-negócio)
+3. [Autenticação & Autorização](#-autenticação--autorização)
+4. [Endpoints](#-endpoints-visão-geral)
+   - [Usuários](#usuários)
+   - [Administradores](#administradores)
+   - [Livros, cópias e autores](#livros-cópias-e-autores)
+   - [Empréstimos, reservas e multas](#empréstimos-reservas-e-multas)
+5. [Exemplos de JSON](#-exemplos-de-json)
+   - [Empréstimo](#empréstimo)
+   - [Reserva](#reserva)
+   - [Multa](#multa)
+6. [Tecnologias utilizadas](#-tecnologias-utilizadas)
+7. [Como rodar o projeto localmente](#️-como-rodar-o-projeto-localmente)
+8. [Documentação](#-documentação)
 
 --- 
 ## 📌 Principais Funcionalidades
@@ -77,6 +96,7 @@ Além disso, implementação de consultas SQL personalizadas:
 ---
 ## 📡 Endpoints (visão geral)
 
+> POST -> `/populate` : Popular Banco de Dados (Opcional)
 
 <details>
 <summary style="font-size: 1.5em;"><strong>👤 Usuários</strong></summary>
@@ -154,7 +174,6 @@ Além disso, implementação de consultas SQL personalizadas:
 <details>
 <summary style="font-size: 1.5em;"><strong>Empréstimo</strong></summary>
 
-### Empréstimo
 ##### request:
 ```json
 {
