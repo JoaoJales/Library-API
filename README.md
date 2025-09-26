@@ -45,11 +45,42 @@ Além disso, implementação de consultas SQL personalizadas:
   - `STUDENT` / `PROFESSOR` → podem reservar, emprestar e devolver livros.
   - `ADMIN` → acesso total e endpoints administrativos (cadastros, relatórios, gestão de multas).
 
+<details>
+<summary style="font-size: 1.5em;"><strong>⚙️ Utilize esses usuários para Testes</strong></summary>
+
+##### Admin:
+```json
+{
+  "email":"admin@email.com",
+  "password":"admin123"
+}
+```
+
+##### Student (Estudante):
+```json
+{
+  "email":"student@email.com",
+  "password":"student1"
+}
+```
+
+##### Professor:
+```json
+{
+  "email":"professor@email.com",
+  "password":"professor1"
+}
+```
+
+</details>
 
 ---
 ## 📡 Endpoints (visão geral)
 
-### 👤 Usuários
+
+<details>
+<summary style="font-size: 1.5em;"><strong>👤 Usuários</strong></summary>
+
 | Método         | Endpoint                      | Descrição                                      |
 |----------------|-------------------------------|------------------------------------------------|
 | POST           | `/users/register`             | Cadastra um novo usuário                       |
@@ -62,7 +93,11 @@ Além disso, implementação de consultas SQL personalizadas:
 | GET            | `/users/reservations/actives` | Lista reservas ativas ou prontas para retirada |
 | GET            | `/users/fines/unpaid`         | Lista multas não pagas                         |
 
-### 👤 Administradores
+</details>
+
+<details>
+<summary style="font-size: 1.5em;"><strong>👤 Administradores</strong></summary>
+
 | Método          | Endpoint                       | Descrição                           |
 |-----------------|--------------------------------|-------------------------------------|
 | GET             | `/admin/users`                 | Lista todos os usuários ativos      |
@@ -74,18 +109,30 @@ Além disso, implementação de consultas SQL personalizadas:
 | GET             | `/reports/books/availability`  | Lista disponibilidade dos livros    |
 | GET             | `/reports/users/fines/top`     | Lista usuários com mais multas      |   
 
+</details>
 
-### 📚 Livros, cópias e autores
+
+<details>
+<summary style="font-size: 1.5em;"><strong>📚 Livros, cópias e autores</strong></summary>
+
 ##### POST, PUT e DELETE limitado ao `admin`
 
 | Método | Endpoint             | Descrição                      |
 |--------|----------------------|--------------------------------|
+| POST   | `/admin/books`       | Registra Livro                 |
+| POST   | `/admin/authors`     | Registrar Autor                |
+| POST   | `/admin/bookCopies`  | Registrar Cópia de Livro       |
+| DELETE | `/admin/books`       | Desativar Livro                |
+| DELETE | `/admin/bookCopies`  | Desativar Livro                |
 | GET    | `/books`             | Lista todos os livros          |
 | GET    | `/books/{bookId}`    | Busca detalhamento de um livro |
 | GET    | `/authors/{autorId}` | Busca detalhamento de um autor |
 
+</details>
 
-### 📑 Empréstimos, reservas e multas
+
+<details>
+<summary style="font-size: 1.5em;"><strong>📑 Empréstimos, reservas e multas</strong></summary>
 
 | Método | Endpoint                          | Descrição                 |
 |--------|-----------------------------------|---------------------------|
@@ -97,10 +144,16 @@ Além disso, implementação de consultas SQL personalizadas:
 | DELETE | `/reservations/{reservId}`        | Cancela uma reserva       |
 | PATCH  | `/fines/{fineId}/paid`            | Quitar multa              |
 
+</details>
+
 > OBS: Alguns endpoints restritos a administradores (Regras de Negócio real) foram liberados a outros usuários para testes. Para mais detalhes veja as regras liberadas em [`RULE.md`](./RULE.md)
 
 ---
 ## 📄 Exemplos de JSON
+
+<details>
+<summary style="font-size: 1.5em;"><strong>Empréstimo</strong></summary>
+
 ### Empréstimo
 ##### request:
 ```json
@@ -123,8 +176,12 @@ Além disso, implementação de consultas SQL personalizadas:
   "renewals": 0
 }
 ```
+</details>
 
-### Reserva
+
+<details>
+<summary style="font-size: 1.5em;"><strong>Reserva</strong></summary>
+
 ##### request:
 ```json
 {
@@ -144,8 +201,11 @@ Além disso, implementação de consultas SQL personalizadas:
   "status": "ACTIVE"
 }
 ```
+</details>
 
-### Multa
+<details>
+<summary style="font-size: 1.5em;"><strong>Multa</strong></summary>
+
 ```json
 {
   "fineId": 15,
@@ -165,6 +225,7 @@ Além disso, implementação de consultas SQL personalizadas:
   }
 }
 ```
+</details>
 
 --- 
 ### ⚙️ Tecnologias utilizadas
