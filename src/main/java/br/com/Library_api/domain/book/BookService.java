@@ -66,6 +66,10 @@ public class BookService {
         return new GetDetailingBookDTO(book);
     }
 
+    public Page<GetDetailingBookDTO> searchBooksByTitle(String title, Pageable pageable) {
+        return bookRepository.findByTitle(title, pageable).map(GetDetailingBookDTO::new);
+    }
+
     @Transactional
     public GetDetailingBookDTO putBook(PutBookDTO data){
         var book = findBook(data.bookId());
